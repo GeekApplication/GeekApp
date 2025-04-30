@@ -1,0 +1,21 @@
+﻿@inherits LayoutComponentBase
+@inject NavigationManager NavManager
+@inject IAuthService AuthService
+@using Microsoft.AspNetCore.Components.Authorization
+
+<PageTitle>GeekApp</PageTitle>
+
+<div class="main-layout">
+    <Navbar />
+    
+    <div class="main-content">
+        @Body
+    </div>
+</div>
+
+@code {
+    private async Task Logout()
+    {
+        await AuthService.LogoutAsync();
+    }
+}

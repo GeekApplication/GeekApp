@@ -1,0 +1,76 @@
+﻿@page "/login"
+@attribute [AllowAnonymous]
+@attribute [Authorize(Policy = "NotAuthenticated")]
+@using GeekApp.Shared.DTOs
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Components.Authorization
+@inject IAuthService AuthService
+@inject NavigationManager NavManager
+@inject AuthenticationStateProvider AuthStateProvider
+
+@if (isAuthenticated)
+{
+    <p>Redirecting to your profile...</p>
+}
+else
+{
+<div class="auth-form">
+    <h2>Login</h2>
+
+    @if (!string.IsNullOrEmpty(error))
+    {
+        <div class="error-message">@error</div>
+    }
+
+    <EditForm Model="@model" OnValidSubmit="HandleLogin">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+
+        <div class="form-group">
+            <InputText @bind-Value="model.Email" placeholder="Email" class="form-control" />
+            <ValidationMessage For="@(() => model.Email)" class="validation-message" />
+        </div>
+
+        <div class="form-group">
+            <InputText @bind-Value="model.Password"
+                       placeholder="Password"
+                       type="password"
+                       class="form-control" />
+            <ValidationMessage For="@(() => model.Password)" class="validation-message" />
+        </div>
+
+        <button type="submit" class="btn btn-primary">Login</button>
+    </EditForm>
+</div>
+}
+
+@code {
+    private LoginRequest model = new();
+    private string error = string.Empty;
+    private bool isAuthenticated = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        isAuthenticated = authState.User.Identity?.IsAuthenticated ?? false;
+
+        if (isAuthenticated)
+        {
+            NavManager.NavigateTo("/profile");
+        }
+    }
+
+    private async Task HandleLogin()
+    {
+        error = string.Empty;
+
+        if (await AuthService.LoginAsync(model))
+        {
+            NavManager.NavigateTo("/", forceLoad: true);
+        }
+        else
+        {
+            error = "Invalid login credentials";
+        }
+    }
+}

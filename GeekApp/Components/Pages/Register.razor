@@ -1,0 +1,69 @@
+﻿@page "/register"
+@attribute [AllowAnonymous]
+@attribute [Authorize(Policy = "NotAuthenticated")]
+@using GeekApp.Shared.DTOs
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Components.Authorization
+@inject IAuthService AuthService
+@inject NavigationManager NavManager
+@inject AuthenticationStateProvider AuthStateProvider
+
+@if (isAuthenticated)
+{
+    <p>Redirecting to your profile...</p>
+}
+else
+{
+<div class="auth-form">
+    <h2>Register</h2>
+
+    <EditForm Model="@registerModel" OnValidSubmit="HandleRegister">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+
+        <div class="form-group">
+            <InputText @bind-Value="registerModel.Name" placeholder="Name" class="form-control" />
+            <ValidationMessage For="@(() => registerModel.Name)" class="validation-message" />
+        </div>
+
+        <div class="form-group">
+            <InputText @bind-Value="registerModel.Email" placeholder="Email" class="form-control" />
+            <ValidationMessage For="@(() => registerModel.Email)" class="validation-message" />
+        </div>
+
+        <div class="form-group">
+            <InputText @bind-Value="registerModel.Password" placeholder="Password" type="password" class="form-control" />
+            <ValidationMessage For="@(() => registerModel.Password)" class="validation-message" />
+        </div>
+
+        <div class="form-group">
+            <InputText @bind-Value="registerModel.ConfirmPassword" placeholder="Confirm Password" type="password" class="form-control" />
+            <ValidationMessage For="@(() => registerModel.ConfirmPassword)" class="validation-message" />
+        </div>
+
+        <button type="submit" class="btn btn-primary">Register</button>
+    </EditForm>
+</div>
+}
+
+@code {
+    private RegisterRequest registerModel = new();
+    private bool isAuthenticated = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        isAuthenticated = authState.User.Identity?.IsAuthenticated ?? false;
+
+        if (isAuthenticated)
+        {
+            NavManager.NavigateTo("/profile");
+        }
+    }
+    private async Task HandleRegister()
+    {
+        var result = await AuthService.RegisterAsync(registerModel);
+        if (result)
+            NavManager.NavigateTo("/", forceLoad: true);
+    }
+}
