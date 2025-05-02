@@ -1,0 +1,151 @@
+﻿@page "/title/{MediaType}/{Id:int}"
+@using GeekApp.Shared.ApiModels
+@inject HttpClient Http
+@inject NavigationManager Navigation
+
+@if (isLoading)
+{
+    <div class="d-flex align-items-center justify-content-center min-vh-100 bg-tepapa-green text-white">
+        <div class="spinner-border text-light-blue" role="status"></div>
+        <span class="ms-3 fs-5">Loading...</span>
+    </div>
+}
+else if (errorMessage != null)
+{
+    <div class="container my-4">
+        <div class="alert alert-danger shadow-sm" role="alert">
+            <strong>Error:</strong> @errorMessage
+        </div>
+    </div>
+}
+else if (titleData != null)
+{
+    <div class="min-vh-100 bg-tepapa-green text-white">
+        <!-- Hero Section with Backdrop -->
+        <div class="position-relative hero-section">
+            <img src="@titleData.Details.BackdropPath" alt="Backdrop" class="position-absolute w-100 h-100 object-fit-cover opacity-25" />
+            <div class="container py-5 py-md-6 position-relative">
+                <div class="row g-4 align-items-center">
+                    <div class="col-md-4">
+                        <img src="@titleData.Details.PosterPath" alt="Poster" class="img-fluid rounded-3 shadow-lg poster-img" />
+                    </div>
+                    <div class="col-md-8">
+                        <h1 class="display-4 fw-bold mb-3 orbitron">@(titleData.Details.Title ?? titleData.Details.Name)</h1>
+                        <p class="lead text-gray-200 mb-4">@titleData.Details.Overview</p>
+                        <div class="row g-3">
+                            <div class="col-sm-6">
+                                <p><strong>Genres:</strong> @string.Join(", ", titleData.Details.Genres.Select(g => g.Name))</p>
+                            </div>
+                            <div class="col-sm-6">
+                                <p><strong>Release Date:</strong> @(titleData.Details.ReleaseDate ?? titleData.Details.FirstAirDate)</p>
+                            </div>
+                            <div class="col-sm-6">
+                                <p><strong>Rating:</strong> @titleData.Details.VoteAverage.ToString("0.0")/10</p>
+                            </div>
+                            <div class="col-sm-6">
+                                <p><strong>Runtime:</strong> @titleData.Details.Runtime minutes</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Cast Section -->
+        <div class="container py-5">
+            <h2 class="h3 fw-bold mb-4 orbitron">Cast</h2>
+            <div class="row row-cols-2 row-cols-sm-3 row-cols-md-4 row-cols-lg-5 g-4">
+                @foreach (var cast in titleData.Credits.Cast.Take(10))
+                {
+                    <div class="col">
+                        <div class="cast-card bg-gray-800 rounded-3 shadow-sm text-center">
+                            <img src="@cast.ProfilePath" alt="@cast.Name" class="img-fluid rounded-top cast-img" />
+                            <div class="p-3">
+                                <p class="fw-medium text-white mb-1">@cast.Name</p>
+                                <p class="text-sm text-gray-400">@cast.Character</p>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+
+        <!-- Crew Section -->
+        <div class="container py-5 bg-gray-900">
+            <h2 class="h3 fw-bold mb-4 orbitron">Crew</h2>
+            <div class="row row-cols-2 row-cols-sm-3 row-cols-md-4 row-cols-lg-5 g-4">
+                @foreach (var crew in titleData.Credits.Crew.Take(10))
+                {
+                    <div class="col">
+                        <div class="crew-card bg-gray-800 rounded-3 shadow-sm p-3">
+                            <p class="fw-medium text-white mb-1">@crew.Name</p>
+                            <p class="text-sm text-gray-400">@crew.Job (@crew.Department)</p>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+
+        <!-- Similar Titles Section -->
+        <div class="container py-5">
+            <h2 class="h3 fw-bold mb-4 orbitron">Similar Titles</h2>
+            <div class="row row-cols-2 row-cols-sm-3 row-cols-md-4 row-cols-lg-5 g-4">
+                @foreach (var similar in titleData.Similar.Results.Take(10))
+                {
+                    <div class="col">
+                        <a href="/title/@MediaType/@similar.Id" class="similar-card bg-gray-800 rounded-3 shadow-sm text-center text-decoration-none">
+                            <img src="@similar.PosterPath" alt="@(similar.Title ?? similar.Name)" class="img-fluid rounded-top similar-img" />
+                            <div class="p-3">
+                                <p class="fw-medium text-white mb-0">@(similar.Title ?? similar.Name)</p>
+                            </div>
+                        </a>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter]
+    public string MediaType { get; set; }
+
+    [Parameter]
+    public int Id { get; set; }
+
+    private TmdbRoot titleData;
+    private bool isLoading = true;
+    private string errorMessage;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        await LoadTitleData();
+    }
+
+    private async Task LoadTitleData()
+    {
+        try
+        {
+            isLoading = true;
+            errorMessage = null;
+
+            var response = await Http.GetAsync($"https://localhost:7282/api/tmdb/title/{MediaType}/{Id}");
+            if (response.IsSuccessStatusCode)
+            {
+                titleData = await response.Content.ReadFromJsonAsync<TmdbRoot>();
+            }
+            else
+            {
+                errorMessage = $"Failed to load title details: {response.ReasonPhrase}";
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"An error occurred: {ex.Message}";
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+}

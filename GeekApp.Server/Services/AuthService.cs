@@ -82,11 +82,10 @@ namespace GeekApp.Server.Services
 
             var claims = new List<Claim>
         {
-            new Claim(ClaimTypes.NameIdentifier, user.Id),
-            new Claim(ClaimTypes.Email, user.Email),
-            new Claim(ClaimTypes.Name, user.Name),
-            new Claim("userId", user.UserId),
-            new Claim("createdAt", user.CreatedAt.ToString("o")) // ISO 8601 format
+            new Claim("nameid", user.Id),           
+            new Claim("email", user.Email),           
+            new Claim("unique_name", user.Name),        
+            new Claim("createdAt", user.CreatedAt.ToString("o")) 
         };
 
             var tokenDescriptor = new SecurityTokenDescriptor

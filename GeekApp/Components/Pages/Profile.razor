@@ -11,22 +11,43 @@
 {
     <div class="profile-card">
         <div class="profile-header">
-            <h2>Welcome, @user.Identity?.Name!</h2>
+            <h2>Welcome, @name!</h2>
         </div>
         <div class="profile-details">
-            <p><strong>Email:</strong> @(user.FindFirst(ClaimTypes.Email)?.Value)</p>
-            <p><strong>Registered since:</strong> @registrationDate.ToShortDateString()</p>
+            <p><strong>User ID:</strong> @userId</p>
+            <p><strong>Email:</strong> @email</p>
+            <p><strong>Registered since:</strong> @registrationDate.ToLocalTime().ToString("f")</p>
         </div>
     </div>
+}
+else
+{
+    <p>Loading profile...</p>
 }
 
 @code {
     private ClaimsPrincipal user;
-    private DateTime registrationDate = DateTime.Now; // Replace with actual registration date from your DB
+    private string name = "";
+    private string email = "";
+    private string userId = "";
+    private DateTime registrationDate = DateTime.MinValue;
 
     protected override async Task OnInitializedAsync()
     {
         var authState = await AuthStateProvider.GetAuthenticationStateAsync();
         user = authState.User;
+
+        if (user.Identity != null && user.Identity.IsAuthenticated)
+        {
+            name = user.FindFirst("unique_name")?.Value ?? "Unknown";
+            email = user.FindFirst("email")?.Value ?? "Unknown";
+            userId = user.FindFirst("nameid")?.Value ?? "Unknown";
+
+            var createdAtClaim = user.FindFirst("createdAt")?.Value;
+            if (DateTime.TryParse(createdAtClaim, out var parsedDate))
+            {
+                registrationDate = parsedDate;
+            }
+        }
     }
 }

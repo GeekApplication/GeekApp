@@ -1,3 +1,4 @@
+
 h1:focus {
     outline: none;
 }
@@ -30,9 +31,11 @@ h1:focus {
 
 /* Custom theme colors */
 :root {
-    --bs-primary: #2c3e50;
-    --bs-primary-rgb: 44, 62, 80;
-    --bs-primary-dark: #1a252f;
+    --bs-primary: #0f1a1c;
+    --bs-primary-rgb: 32, 59, 68;
+    --bs-highlight: #00bfff;
+    --bs-gray-dark: #1c2a30;
+    --bs-gray-medium: #1c2a30;
 }
 
 .bg-primary {
@@ -49,22 +52,30 @@ h1:focus {
     }
 
 body {
+    background-color: var(--bs-primary);
+    color: #f0f8ff;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    line-height: 1.6;
-    color: #333;
-    background-color: #f5f5f5;
     margin: 0;
     padding: 0;
 }
-
 h1, h2, h3, h4, h5, h6 {
     color: var(--dark-color);
     margin-top: 0;
 }
 
 a {
-    color: var(--primary-color);
+    color: var(--bs-highlight);
     text-decoration: none;
+}
+
+    a:hover {
+        color: white;
+        text-shadow: 0 0 6px var(--bs-highlight);
+    }
+
+/* Spinner color */
+.spinner-border.text-light-blue {
+    color: var(--bs-highlight);
 }
 
 .validation-summary-errors {
