@@ -1,42 +1,77 @@
 ﻿using GeekApp.Server.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
+using Polly;
+using Polly.Extensions.Http;
+using System.Net;
+using System.Net.Http.Headers;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// 1. Configure Mongo + your AuthService (unchanged)
+// Configure Mongo and AuthService
 builder.Services.AddSingleton<MongoDBService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddMemoryCache();
+builder.Services.AddLogging();
 
-// 2. Add Authentication & Authorization
-builder.Services.AddAuthentication(options =>
+// Register TMDB services with Polly policies
+builder.Services.AddHttpClient("TmdbService", client =>
 {
-    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+    client.BaseAddress = new Uri(builder.Configuration["Tmdb:BaseUrl"]!);
+    client.DefaultRequestHeaders.Accept.Add(
+        new MediaTypeWithQualityHeaderValue("application/json"));
+    client.Timeout = TimeSpan.FromSeconds(30);
 })
-.AddJwtBearer(options =>
-{
-    options.TokenValidationParameters = new TokenValidationParameters
+.AddPolicyHandler(GetRetryPolicy())
+.AddPolicyHandler(GetCircuitBreakerPolicy());
+
+// Register TmdbService and CachedTmdbService
+builder.Services.AddScoped<TmdbService>();
+builder.Services.AddScoped<ITmdbService>(provider =>
+    new CachedTmdbService(
+        provider.GetRequiredService<TmdbService>(),
+        provider.GetRequiredService<IMemoryCache>(),
+        provider.GetRequiredService<ILogger<CachedTmdbService>>()));
+
+builder.Services.AddSingleton<IGenreService, GenreService>();
+
+// Add Authentication & Authorization
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
     {
-        ValidateIssuer = true,
-        ValidateAudience = true,
-        ValidateLifetime = true,
-        ValidateIssuerSigningKey = true,
-        ValidIssuer = builder.Configuration["Jwt:Issuer"],
-        ValidAudience = builder.Configuration["Jwt:Audience"],
-        IssuerSigningKey = new SymmetricSecurityKey(
-                                     Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]))
-    };
-});
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+            ValidIssuer = builder.Configuration["Jwt:Issuer"],
+            ValidAudience = builder.Configuration["Jwt:Audience"],
+            IssuerSigningKey = new SymmetricSecurityKey(
+                Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]))
+        };
+    });
 
 builder.Services.AddAuthorization();
 
-// 3. Swagger (optional)
+// Swagger
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 builder.Services.AddControllers();
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowBlazorFrontend", builder =>
+    {
+        builder.WithOrigins("https://localhost:7004")
+               .AllowAnyMethod()
+               .AllowAnyHeader();
+    });
+});
 
 var app = builder.Build();
 
@@ -47,16 +82,27 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-
-// 4. CORS—allow your Blazor client app’s origin
-app.UseCors(p => p
-    .AllowAnyMethod()
-    .AllowAnyHeader()
-    .WithOrigins("https://localhost:7004") // wherever your Blazor client runs
-);
+app.UseMiddleware<ExceptionHandlingMiddleware>();
+app.UseCors("AllowBlazorFrontend");
 
 app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
 app.Run();
+
+static IAsyncPolicy<HttpResponseMessage> GetRetryPolicy()
+{
+    return HttpPolicyExtensions
+        .HandleTransientHttpError()
+        .OrResult(msg => msg.StatusCode == HttpStatusCode.TooManyRequests)
+        .WaitAndRetryAsync(3, retryAttempt =>
+            TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)));
+}
+
+static IAsyncPolicy<HttpResponseMessage> GetCircuitBreakerPolicy()
+{
+    return HttpPolicyExtensions
+        .HandleTransientHttpError()
+        .CircuitBreakerAsync(5, TimeSpan.FromSeconds(30));
+}

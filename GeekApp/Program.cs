@@ -10,6 +10,14 @@ builder.Services.AddHttpContextAccessor(); // Add this line
 builder.Services.AddProtectedBrowserStorage();  // Add this line
 builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
+builder.Services.AddScoped<GeekApp.Server.Services.ITmdbService, GeekApp.Server.Services.TmdbService>(); // Add this
+builder.Services.AddScoped<GeekApp.Server.Services.CachedTmdbService>(); // If using caching
+builder.Services.AddMemoryCache(); // Required for CachedTmdbService
+builder.Services.AddScoped<BackendService>();
+builder.Services.AddHttpClient("Backend", client => 
+{
+    client.BaseAddress = new Uri("https://localhost:7282"); // Your backend URL
+});
 
 builder.Services.AddLogging();
 builder.Services.AddCascadingAuthenticationState();
@@ -32,6 +40,12 @@ builder.Services.AddAuthorization(options =>
         policy.RequireAssertion(context =>
             context.User.Identity == null || !context.User.Identity.IsAuthenticated);
     });
+});
+
+builder.Services.AddLogging(config =>
+{
+    config.AddDebug();
+    config.AddConsole();
 });
 
 var app = builder.Build();

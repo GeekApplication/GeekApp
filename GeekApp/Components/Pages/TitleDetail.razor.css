@@ -1,0 +1,69 @@
+﻿/* Dark overlay behind hero content */
+.hero-section {
+    position: relative;
+    background-color: var(--bs-primary);
+    color: white;
+    padding: 2rem 0;
+}
+
+    .hero-section::before {
+        content: '';
+        background-image: url('/path-to-your-background.jpg'); /* Set proper path */
+        background-size: cover;
+        background-position: center;
+        opacity: 0.3;
+        position: absolute;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        z-index: 0;
+    }
+
+    .hero-section .container {
+        position: relative;
+        z-index: 1;
+    }
+
+/* Poster image styling */
+.poster-img {
+    max-width: 100%;
+    border-radius: 0.5rem;
+    border: 3px solid var(--bs-highlight);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+    .poster-img:hover {
+        transform: scale(1.03);
+        box-shadow: 0 0 15px var(--bs-highlight);
+    }
+
+/* Headings */
+.orbitron {
+    font-family: 'Orbitron', sans-serif;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: white;
+}
+
+/* Cast cards */
+.cast-card {
+    background-color: var(--bs-gray-medium);
+    border: 1px solid #00bfff20;
+    border-radius: 0.5rem;
+    overflow: hidden;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+    .cast-card:hover {
+        transform: scale(1.05);
+        box-shadow: 0 0 10px var(--bs-highlight);
+    }
+
+.cast-img {
+    width: 100%;
+    height: 250px;
+    object-fit: cover;
+    border-bottom: 2px solid var(--bs-highlight);
+}
