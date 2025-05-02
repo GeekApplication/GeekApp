@@ -28,7 +28,6 @@ namespace GeekApp.Server.Services
         public async Task<TmdbRoot> GetTitleDetailsAsync(string mediaType, int id)
         {
             var cacheKey = $"title_details_{mediaType}_{id}";
-
             try
             {
                 return await _cache.GetOrCreateAsync(cacheKey, async entry =>
@@ -49,7 +48,6 @@ namespace GeekApp.Server.Services
         public async Task<TmdbResponse> GetTrendingAsync(string mediaType = "all", string timeWindow = "week")
         {
             var cacheKey = $"trending_{mediaType}_{timeWindow}";
-
             try
             {
                 return await _cache.GetOrCreateAsync(cacheKey, async entry =>
@@ -70,7 +68,6 @@ namespace GeekApp.Server.Services
         public async Task<TmdbContentDetails> GetContentDetailsAsync(string mediaType, int id)
         {
             var cacheKey = $"details_{mediaType}_{id}";
-
             try
             {
                 return await _cache.GetOrCreateAsync(cacheKey, async entry =>
@@ -91,7 +88,6 @@ namespace GeekApp.Server.Services
         public async Task<TmdbCredits> GetCreditsAsync(string mediaType, int id)
         {
             var cacheKey = $"credits_{mediaType}_{id}";
-
             try
             {
                 return await _cache.GetOrCreateAsync(cacheKey, async entry =>
@@ -112,7 +108,6 @@ namespace GeekApp.Server.Services
         public async Task<TmdbResponse> GetSimilarAsync(string mediaType, int id)
         {
             var cacheKey = $"similar_{mediaType}_{id}";
-
             try
             {
                 return await _cache.GetOrCreateAsync(cacheKey, async entry =>
@@ -130,9 +125,48 @@ namespace GeekApp.Server.Services
             }
         }
 
+        public async Task<TmdbSeason> GetSeasonDetailsAsync(int tvId, int seasonNumber)
+        {
+            var cacheKey = $"season_{tvId}_{seasonNumber}";
+            try
+            {
+                return await _cache.GetOrCreateAsync(cacheKey, async entry =>
+                {
+                    entry.SetOptions(_cacheOptions);
+                    var result = await _tmdbService.GetSeasonDetailsAsync(tvId, seasonNumber);
+                    _logger.LogInformation($"Fetched fresh season details for TV {tvId} season {seasonNumber}");
+                    return result;
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error fetching season details for TV {tvId} season {seasonNumber}");
+                throw;
+            }
+        }
+
+        public async Task<TmdbEpisode> GetEpisodeDetailsAsync(int tvId, int seasonNumber, int episodeNumber)
+        {
+            var cacheKey = $"episode_{tvId}_{seasonNumber}_{episodeNumber}";
+            try
+            {
+                return await _cache.GetOrCreateAsync(cacheKey, async entry =>
+                {
+                    entry.SetOptions(_cacheOptions);
+                    var result = await _tmdbService.GetEpisodeDetailsAsync(tvId, seasonNumber, episodeNumber);
+                    _logger.LogInformation($"Fetched fresh episode details for TV {tvId} season {seasonNumber} episode {episodeNumber}");
+                    return result;
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error fetching episode details for TV {tvId} season {seasonNumber} episode {episodeNumber}");
+                throw;
+            }
+        }
+
         public string GetImageUrl(string path, string size = "w500")
         {
-            // No caching for image URLs as they're already CDN-based
             return _tmdbService.GetImageUrl(path, size);
         }
 

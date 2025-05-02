@@ -32,5 +32,19 @@ namespace GeekApp.Server.Controllers
                 return StatusCode(500, new { error = "Failed to fetch title details", details = ex.Message });
             }
         }
+
+        [HttpGet("tv/{tvId}/season/{seasonNumber}/episode/{episodeNumber}")]
+        public async Task<ActionResult<TmdbEpisode>> GetEpisodeDetails(int tvId, int seasonNumber, int episodeNumber)
+        {
+            try
+            {
+                var result = await _tmdbService.GetEpisodeDetailsAsync(tvId, seasonNumber, episodeNumber);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { error = "Failed to fetch episode details", details = ex.Message });
+            }
+        }
     }
 }

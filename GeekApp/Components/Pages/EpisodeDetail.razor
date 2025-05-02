@@ -1,0 +1,96 @@
+﻿@page "/tv/{TvId:int}/season/{SeasonNumber:int}/episode/{EpisodeNumber:int}"
+@using GeekApp.Shared.ApiModels
+@inject HttpClient Http
+@inject NavigationManager Navigation
+
+@if (isLoading)
+{
+    <div class="d-flex align-items-center justify-content-center min-vh-100 bg-tepapa-green text-white">
+        <div class="spinner-border text-light-blue" role="status"></div>
+        <span class="ms-3 fs-5">Loading...</span>
+    </div>
+}
+else if (errorMessage != null)
+{
+    <div class="container my-4">
+        <div class="alert alert-danger shadow-sm" role="alert">
+            <strong>Error:</strong> @errorMessage
+        </div>
+    </div>
+}
+else if (episodeData != null)
+{
+    <div class="min-vh-100 bg-tepapa-green text-white">
+        <!-- Hero Section with Still Image -->
+        <div class="position-relative hero-section">
+            <img src="@(episodeData.StillPath ?? "https://via.placeholder.com/1280x720?text=No+Image")" alt="Episode Still" class="position-absolute w-100 h-100 object-fit-cover opacity-30" />
+            <div class="container py-5 py-md-6 position-relative">
+                <div class="row g-4 align-items-center">
+                    <div class="col-md-4">
+                        <img src="@(episodeData.StillPath ?? "https://via.placeholder.com/300x450?text=No+Image")" alt="Episode Still" class="img-fluid rounded-3 shadow-lg episode-img" />
+                    </div>
+                    <div class="col-md-8">
+                        <h1 class="display-4 fw-bold mb-3 orbitron">@episodeData.Name</h1>
+                        <p class="lead text-gray-200 mb-3">Season @SeasonNumber, Episode @EpisodeNumber</p>
+                        <p class="text-gray-200 mb-4">@episodeData.Overview</p>
+                        <div class="row g-3">
+                            <div class="col-sm-6">
+                                <p><strong>Air Date:</strong> @(episodeData.AirDate ?? "N/A")</p>
+                            </div>
+                            <div class="col-sm-6">
+                                <p><strong>Rating:</strong> @episodeData.VoteAverage.ToString("0.0")/10 (@episodeData.VoteCount votes)</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter]
+    public int TvId { get; set; }
+
+    [Parameter]
+    public int SeasonNumber { get; set; }
+
+    [Parameter]
+    public int EpisodeNumber { get; set; }
+
+    private TmdbEpisode episodeData;
+    private bool isLoading = true;
+    private string errorMessage;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        await LoadEpisodeData();
+    }
+
+    private async Task LoadEpisodeData()
+    {
+        try
+        {
+            isLoading = true;
+            errorMessage = null;
+
+            var response = await Http.GetAsync($"https://localhost:7282/api/tmdb/tv/{TvId}/season/{SeasonNumber}/episode/{EpisodeNumber}");
+            if (response.IsSuccessStatusCode)
+            {
+                episodeData = await response.Content.ReadFromJsonAsync<TmdbEpisode>();
+            }
+            else
+            {
+                errorMessage = $"Failed to load episode details: {response.ReasonPhrase}";
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"An error occurred: {ex.Message}";
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+}

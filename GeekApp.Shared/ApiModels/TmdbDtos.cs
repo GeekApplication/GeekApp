@@ -54,6 +54,99 @@ namespace GeekApp.Shared.ApiModels
         public string Name { get; set; }
     }
 
+    public class TmdbProductionCompany
+    {
+        [JsonProperty("id")]
+        public int Id { get; set; }
+
+        [JsonProperty("name")]
+        public string Name { get; set; }
+
+        [JsonProperty("logo_path")]
+        public string LogoPath { get; set; }
+
+        [JsonProperty("origin_country")]
+        public string OriginCountry { get; set; }
+    }
+
+    public class TmdbEpisode
+    {
+        [JsonProperty("id")]
+        public int Id { get; set; }
+
+        [JsonProperty("episode_number")]
+        public int EpisodeNumber { get; set; }
+
+        [JsonProperty("name")]
+        public string Name { get; set; }
+
+        [JsonProperty("overview")]
+        public string Overview { get; set; }
+
+        [JsonProperty("air_date")]
+        public string AirDate { get; set; }
+
+        [JsonProperty("still_path")]
+        public string StillPath { get; set; }
+
+        [JsonProperty("vote_average")]
+        public double VoteAverage { get; set; }
+
+        [JsonProperty("vote_count")]
+        public int VoteCount { get; set; }
+    }
+
+    public class TmdbSeason
+    {
+        [JsonProperty("air_date")]
+        public string AirDate { get; set; }
+
+        [JsonProperty("episode_count")]
+        public int EpisodeCount { get; set; }
+
+        [JsonProperty("id")]
+        public int Id { get; set; }
+
+        [JsonProperty("name")]
+        public string Name { get; set; }
+
+        [JsonProperty("overview")]
+        public string Overview { get; set; }
+
+        [JsonProperty("poster_path")]
+        public string PosterPath { get; set; }
+
+        [JsonProperty("season_number")]
+        public int SeasonNumber { get; set; }
+
+        [JsonProperty("episodes")]
+        public List<TmdbEpisode> Episodes { get; set; }
+    }
+
+    public class TmdbVideo
+    {
+        [JsonProperty("id")]
+        public string Id { get; set; }
+
+        [JsonProperty("key")]
+        public string Key { get; set; }
+
+        [JsonProperty("name")]
+        public string Name { get; set; }
+
+        [JsonProperty("site")]
+        public string Site { get; set; }
+
+        [JsonProperty("type")]
+        public string Type { get; set; }
+    }
+
+    public class TmdbVideoResponse
+    {
+        [JsonProperty("results")]
+        public List<TmdbVideo> Results { get; set; }
+    }
+
     public class TmdbContentDetails
     {
         [JsonProperty("id")]
@@ -64,6 +157,12 @@ namespace GeekApp.Shared.ApiModels
 
         [JsonProperty("name")]
         public string Name { get; set; }
+
+        [JsonProperty("original_title")]
+        public string OriginalTitle { get; set; }
+
+        [JsonProperty("original_name")]
+        public string OriginalName { get; set; }
 
         [JsonProperty("overview")]
         public string Overview { get; set; }
@@ -84,13 +183,43 @@ namespace GeekApp.Shared.ApiModels
         public string FirstAirDate { get; set; }
 
         [JsonProperty("runtime")]
-        public int Runtime { get; set; }
+        public int? Runtime { get; set; }
+
+        [JsonProperty("episode_run_time")]
+        public List<int> EpisodeRunTime { get; set; }
 
         [JsonProperty("seasons")]
-        public object Seasons { get; set; }
+        public List<TmdbSeason> Seasons { get; set; }
+
+        [JsonProperty("number_of_seasons")]
+        public int? NumberOfSeasons { get; set; }
+
+        [JsonProperty("number_of_episodes")]
+        public int? NumberOfEpisodes { get; set; }
 
         [JsonProperty("vote_average")]
         public double VoteAverage { get; set; }
+
+        [JsonProperty("vote_count")]
+        public int VoteCount { get; set; }
+
+        [JsonProperty("tagline")]
+        public string Tagline { get; set; }
+
+        [JsonProperty("status")]
+        public string Status { get; set; }
+
+        [JsonProperty("budget")]
+        public long? Budget { get; set; }
+
+        [JsonProperty("revenue")]
+        public long? Revenue { get; set; }
+
+        [JsonProperty("production_companies")]
+        public List<TmdbProductionCompany> ProductionCompanies { get; set; }
+
+        [JsonProperty("videos")]
+        public TmdbVideoResponse Videos { get; set; }
     }
 
     public class TmdbResult
