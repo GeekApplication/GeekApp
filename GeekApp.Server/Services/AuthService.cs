@@ -82,6 +82,7 @@ namespace GeekApp.Server.Services
 
             var claims = new List<Claim>
         {
+
             new Claim("nameid", user.Id),           
             new Claim("email", user.Email),           
             new Claim("unique_name", user.Name),        
