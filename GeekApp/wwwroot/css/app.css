@@ -33,20 +33,128 @@ h1:focus {
     --bs-primary: #2c3e50;
     --bs-primary-rgb: 44, 62, 80;
     --bs-primary-dark: #1a252f;
+    --bs-cyan: #00ffff;
 }
 
 .bg-primary {
     background-color: var(--bs-primary) !important;
 }
 
-.navbar-dark .navbar-nav .nav-link {
-    color: rgba(255, 255, 255, 0.9);
+/* Enhanced Navbar Styles */
+.navbar {
+    background: rgba(44, 62, 80, 0.95) !important;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 2px 15px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+    padding: 0.5rem 1rem;
+    margin-bottom: 0;
+    z-index: 1000;
+    position: sticky;
+    top: 0;
 }
 
-    .navbar-dark .navbar-nav .nav-link:hover,
-    .navbar-dark .navbar-nav .nav-link:focus {
-        color: white;
+.navbar-brand {
+    color: white !important;
+    font-size: 1.25rem;
+    font-weight: bold;
+    margin-right: 2rem;
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+    .navbar-brand:hover {
+        color: var(--bs-cyan) !important;
+        text-shadow: 0 0 8px rgba(0, 255, 255, 0.4);
+        transform: scale(1.03);
     }
+
+/* Nav link styling with animated underline effect */
+.navbar-dark .navbar-nav .nav-link {
+    color: rgba(255, 255, 255, 0.9) !important;
+    padding: 0.5rem 1rem;
+    margin: 0 0.25rem;
+    position: relative;
+    transition: all 0.3s ease;
+    border-radius: 4px;
+}
+
+    .navbar-dark .navbar-nav .nav-link::after {
+        content: '';
+        position: absolute;
+        width: 0;
+        height: 2px;
+        bottom: 0;
+        left: 50%;
+        background-color: var(--bs-cyan);
+        transition: all 0.3s ease;
+        transform: translateX(-50%);
+    }
+
+    .navbar-dark .navbar-nav .nav-link:hover {
+        color: white !important;
+        background: rgba(255, 255, 255, 0.1);
+    }
+
+        .navbar-dark .navbar-nav .nav-link:hover::after,
+        .navbar-dark .navbar-nav .nav-link:focus::after {
+            width: 70%;
+        }
+
+    /* Active link styling - removed permanent underline */
+    .navbar-dark .navbar-nav .nav-link.active {
+        color: white !important;
+        font-weight: 500;
+    }
+
+        .navbar-dark .navbar-nav .nav-link.active::after {
+            display: none;
+        }
+
+        /* Show underline only on hover for active links */
+        .navbar-dark .navbar-nav .nav-link.active:hover::after,
+        .navbar-dark .navbar-nav .nav-link.active:focus::after {
+            display: block;
+            width: 70%;
+            background-color: var(--bs-cyan);
+        }
+
+/* Logout button hover effect */
+.navbar .btn-outline-light {
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    color: white;
+    transition: all 0.3s ease;
+    padding: 0.375rem 0.75rem;
+    margin-left: 0.5rem;
+}
+
+    .navbar .btn-outline-light:hover {
+        background: rgba(0, 255, 255, 0.1);
+        color: var(--bs-cyan);
+        border-color: var(--bs-cyan);
+        box-shadow: 0 0 10px rgba(0, 255, 255, 0.3);
+    }
+
+/* Mobile menu adjustments */
+.navbar-toggler {
+    border-color: rgba(255, 255, 255, 0.3);
+}
+
+.navbar-toggler-icon {
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba%28255, 255, 255, 0.8%29' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+}
+
+/* Smooth collapse animation */
+.navbar-collapse {
+    transition: all 0.3s ease;
+}
+
+/* Padding for content if needed */
+.main-content {
+    padding-top: 1px;
+    margin-top: 0;
+}
 
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -55,6 +163,8 @@ body {
     background-color: #f5f5f5;
     margin: 0;
     padding: 0;
+    background: linear-gradient(135deg, #1e3c72, #2a5298) !important;
+    background-attachment: fixed !important;
 }
 
 h1, h2, h3, h4, h5, h6 {

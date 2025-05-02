@@ -1,51 +1,115 @@
-﻿.auth-form {
-    max-width: 400px;
-    margin: 2rem auto;
+﻿/* Bakgrund */
+.register-background {
+    min-height: 100vh;
+    background: linear-gradient(120deg, #0f2027, #203a43, #2c5364);
+    background-size: 400% 400%;
+    animation: backgroundMove 15s ease infinite;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     padding: 2rem;
-    background: white;
-    border-radius: 8px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
 
+/* Formkort – glassmorphism */
+.auth-form {
+    background: rgba(255, 255, 255, 0.07);
+    border-radius: 20px;
+    backdrop-filter: blur(20px);
+    box-shadow: 0 0 30px rgba(0, 255, 255, 0.1);
+    padding: 2.5rem;
+    max-width: 420px;
+    width: 100%;
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+    .auth-form h2 {
+        text-align: center;
+        font-size: 2rem;
+        margin-bottom: 1.5rem;
+        color: #00e6e6;
+    }
+
+/* Inmatningsfält */
 .form-group {
-    margin-bottom: 1.5rem;
+    margin-bottom: 1.25rem;
 }
 
 .form-control {
     width: 100%;
-    padding: 0.75rem;
-    border: 1px solid #ddd;
-    border-radius: 4px;
+    padding: 0.75rem 1rem;
     font-size: 1rem;
-    transition: border-color 0.3s ease;
-    margin-bottom: 1rem;
+    border-radius: 10px;
+    border: none;
+    background: rgba(255, 255, 255, 0.1);
+    color: #fff;
+    transition: 0.3s ease;
+    backdrop-filter: blur(4px);
 }
 
-    .form-control:focus {
-        border-color: #3498db;
-        outline: none;
-        box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+    .form-control::placeholder {
+        color: rgba(255, 255, 255, 0.6);
     }
 
+    .form-control:focus {
+        outline: none;
+        background: rgba(255, 255, 255, 0.2);
+        box-shadow: 0 0 0 2px #00e6e6;
+    }
+
+/* Valideringsmeddelanden */
+.validation-message {
+    color: #ff6b6b;
+    font-size: 0.85rem;
+    margin-top: 0.3rem;
+}
+
+/* Knapp */
 .btn-primary {
-    background-color: #2ecc71;
-    color: white;
+    width: 100%;
+    padding: 0.85rem;
+    background-color: #00e6e6;
+    color: #001f2f;
     border: none;
-    padding: 0.75rem 1.5rem;
-    border-radius: 4px;
+    border-radius: 10px;
+    font-weight: bold;
     font-size: 1rem;
     cursor: pointer;
-    transition: background-color 0.3s ease;
-    width: 100%;
+    transition: background 0.3s ease;
 }
 
     .btn-primary:hover {
-        background-color: #27ae60;
+        background-color: #00bfbf;
     }
 
-.validation-message {
-    color: #e74c3c;
-    font-size: 0.875rem;
-    margin-top: -0.75rem;
-    margin-bottom: 1rem;
+/* Inladdningsanimation */
+@keyframes popIn {
+    from {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+.animate-pop {
+    animation: popIn 0.8s ease;
+}
+
+/* Gradientanimation */
+@keyframes backgroundMove {
+    0% {
+        background-position: 0% 50%;
+    }
+
+    50% {
+        background-position: 100% 50%;
+    }
+
+    100% {
+        background-position: 0% 50%;
+    }
 }
