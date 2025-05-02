@@ -1,0 +1,70 @@
+﻿/* Scoped styles for Discover.razor */
+:host {
+    --tepapa-green: #203b44;
+    --light-blue: #60a5fa;
+    --gray-dark: #1f2937;
+    --gray-light: #d1d5db;
+}
+
+.bg-tepapa-green {
+    background-color: var(--tepapa-green);
+}
+
+.btn-light-blue {
+    background-color: var(--light-blue);
+    color: white;
+}
+
+    .btn-light-blue:hover {
+        background-color: #3b82f6;
+    }
+
+.result-card {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+    .result-card:hover {
+        transform: scale(1.05);
+        box-shadow: 0 4px 20px rgba(96, 165, 250, 0.5);
+    }
+
+.result-img {
+    height: 250px;
+    object-fit: cover;
+}
+
+.text-sm {
+    font-size: 0.875rem;
+}
+
+.orbitron {
+    font-family: 'Orbitron', sans-serif;
+}
+
+.bg-gray-800 {
+    background-color: var(--gray-dark);
+}
+
+.text-gray-400 {
+    color: var(--gray-light);
+}
+
+.spinner-border {
+    border-width: 0.2rem;
+}
+
+.genre-checkboxes .form-check {
+    margin-bottom: 0.5rem;
+}
+
+@media (max-width: 576px) {
+    .result-img {
+        height: 200px;
+    }
+}
+
+@media (min-width: 992px) {
+    .result-img {
+        height: 300px;
+    }
+}

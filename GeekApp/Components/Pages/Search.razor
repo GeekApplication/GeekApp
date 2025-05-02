@@ -1,0 +1,367 @@
+﻿@page "/search"
+@page "/search/{Query}"
+@using GeekApp.Shared.ApiModels
+@inject IContentService ContentService
+@inject NavigationManager Navigation
+@inject IJSRuntime JSRuntime
+@inject ILogger<Search> Logger
+
+<div class="min-vh-100 bg-tepapa-green text-white">
+    <div class="container py-5">
+        <!-- Search Bar -->
+        <div class="mb-4">
+            <form class="d-flex" @onsubmit="PerformSearch">
+                <input type="text" class="form-control search-input me-2" placeholder="Search movies, TV shows..." @bind="searchQuery" />
+                <button type="submit" class="btn btn-light-blue">Search</button>
+            </form>
+        </div>
+
+        <!-- Filters -->
+        <div class="mb-4">
+            <div class="row g-3">
+                <div class="col-md-3">
+                    <label class="form-label">Media Type</label>
+                    <select class="form-select" @bind="MediaType" @bind:event="onchange">
+                        <option value="all">All</option>
+                        <option value="movie">Movies</option>
+                        <option value="tv">TV Shows</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Sort By</label>
+                    <select class="form-select" @bind="SortBy" @bind:event="onchange">
+                        <option value="popularity.desc">Popularity</option>
+                        <option value="vote_average.desc">Rating (High to Low)</option>
+                        <option value="title.asc">Title (A-Z)</option>
+                        <option value="release_date.desc">Release Year (Newest)</option>
+                        <option value="release_date.asc">Release Year (Oldest)</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Year</label>
+                    <div class="input-group">
+                        <input type="number" class="form-control" placeholder="Year" @bind="selectedYear" min="1900" max="@DateTime.Now.Year" />
+                        <button class="btn btn-light-blue" @onclick="ApplyYearFilter">Apply</button>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <button class="btn btn-light-blue mt-4" @onclick="ForceRefresh">Refresh Results</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Results -->
+        @if (isLoading)
+        {
+            <div class="d-flex align-items-center justify-content-center">
+                <div class="spinner-border text-light-blue" role="status"></div>
+                <span class="ms-3 fs-5">Loading...</span>
+            </div>
+        }
+        else if (errorMessage != null)
+        {
+            <div class="alert alert-danger shadow-sm" role="alert">
+                <strong>Error:</strong> @errorMessage
+            </div>
+        }
+        else if (displayedResults != null)
+        {
+            <h2 class="h3 fw-bold mb-4 orbitron">
+                @(string.IsNullOrWhiteSpace(searchQuery) ? "Trending Content" : $"Search Results for \"{searchQuery}\"")
+            </h2>
+            <div class="row row-cols-2 row-cols-sm-3 row-cols-md-4 row-cols-lg-5 g-4" id="results-container">
+                @foreach (var result in filteredResults)
+                {
+                    @if (result.MediaType != "person") @* Skip person results *@
+                    {
+                        <div class="col">
+                            <a href="/@(result.MediaType ?? "movie")/@result.Id" class="result-card bg-gray-800 rounded-3 shadow-sm text-center text-decoration-none">
+                                <img src="@result.PosterPath" alt="@(result.Title ?? result.Name ?? "Unknown")"
+                                     class="img-fluid rounded-top result-img"
+                                     onerror="this.src='/images/errorimage.jpg'" />
+                                <div class="p-3">
+                                    <p class="fw-medium text-white mb-1">@(result.Title ?? result.Name ?? "Unknown")</p>
+                                    <p class="text-sm text-gray-400 mb-0">
+                                        @(result.MediaType == "movie" ? "Movie" : "TV Show") - @(result.ReleaseDate ?? result.FirstAirDate ?? "N/A")
+                                    </p>
+                                </div>
+                            </a>
+                        </div>
+                    }
+                }
+            </div>
+
+            <!-- Load More Button -->
+            <!-- Load More Button -->
+            @if (hasMoreResults && !isLoadingMore && displayedResults.Any())
+            {
+                <div class="text-center mt-4">
+                    <button class="btn btn-light-blue" @onclick="LoadMoreResults" disabled="@isLoadingMore">
+                        @(isLoadingMore ? "Loading..." : "Load More")
+                    </button>
+                </div>
+            }
+        }
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public string Query { get; set; }
+
+    private string searchQuery;
+    private string mediaType = "all";
+    private string sortBy = "popularity.desc";
+    private int? selectedYear;
+    private List<TmdbResult> displayedResults = new();
+    private List<TmdbResult> filteredResults = new();
+    private bool isLoading = true;
+    private bool isLoadingMore = false;
+    private string errorMessage;
+    private int currentPage = 1;
+    private bool hasMoreResults = true;
+    private const int MinVoteCount = 100;
+    private string cacheVersion = Guid.NewGuid().ToString("N")[..8];
+    private DotNetObjectReference<Search> objRef;
+    private bool isDisposed;
+    private const int PageSize = 20;
+
+    private string MediaType
+    {
+        get => mediaType;
+        set
+        {
+            if (mediaType != value)
+            {
+                mediaType = value;
+                cacheVersion = Guid.NewGuid().ToString("N")[..8];
+                ResetAndLoad();
+            }
+        }
+    }
+
+    private string SortBy
+    {
+        get => sortBy;
+        set
+        {
+            if (sortBy != value)
+            {
+                sortBy = value;
+                cacheVersion = Guid.NewGuid().ToString("N")[..8];
+                ResetAndLoad();
+            }
+        }
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (!string.IsNullOrEmpty(Query))
+        {
+            searchQuery = Query;
+        }
+        await LoadInitialResults();
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (!string.IsNullOrEmpty(Query) && Query != searchQuery)
+        {
+            searchQuery = Query;
+            await ResetAndLoad();
+        }
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            objRef = DotNetObjectReference.Create(this);
+            await JSRuntime.InvokeVoidAsync("setupInfiniteScroll", objRef);
+        }
+    }
+
+    public void Dispose()
+    {
+        if (!isDisposed)
+        {
+            objRef?.Dispose();
+            isDisposed = true;
+        }
+    }
+
+    [JSInvokable]
+    public async Task LoadMoreIfAtBottom()
+    {
+        if (!isLoading && hasMoreResults && !string.IsNullOrWhiteSpace(searchQuery))
+        {
+            await LoadMoreResults();
+        }
+    }
+
+    private async Task LoadInitialResults()
+    {
+        currentPage = 1;
+        displayedResults.Clear();
+        await LoadSearchResults();
+    }
+
+    private async Task PerformSearch()
+    {
+        if (!string.IsNullOrWhiteSpace(searchQuery))
+        {
+            Navigation.NavigateTo($"/search/{Uri.EscapeDataString(searchQuery)}");
+        }
+        else
+        {
+            Navigation.NavigateTo("/search");
+        }
+        await ResetAndLoad();
+    }
+
+    private async Task ApplyYearFilter()
+    {
+        cacheVersion = Guid.NewGuid().ToString("N")[..8];
+        currentPage = 1;
+        displayedResults.Clear();
+        await LoadSearchResults();
+    }
+
+    private async Task ForceRefresh()
+    {
+        cacheVersion = Guid.NewGuid().ToString("N")[..8];
+        await ResetAndLoad();
+    }
+
+    private async Task ResetAndLoad()
+    {
+        displayedResults.Clear();
+        currentPage = 1;
+        hasMoreResults = true;
+        await LoadSearchResults();
+    }
+
+    private async Task LoadMoreResults()
+    {
+        if (!hasMoreResults || isLoading) return;
+
+        try
+        {
+            isLoadingMore = true;
+            StateHasChanged();
+
+            currentPage++;
+            await LoadSearchResults();
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Error loading more results");
+            errorMessage = "Failed to load more results";
+        }
+        finally
+        {
+            isLoadingMore = false;
+            StateHasChanged();
+        }
+    }
+
+    private async Task LoadSearchResults()
+    {
+        try
+        {
+            isLoading = true;
+            errorMessage = null;
+
+            TmdbSearchResult results;
+
+            if (string.IsNullOrWhiteSpace(searchQuery))
+            {
+                var trending = await ContentService.GetTrendingAsync(mediaType, "week", 1, PageSize);
+                results = new TmdbSearchResult
+                    {
+                        Page = trending.Page,
+                        Results = trending.Results,
+                        TotalPages = trending.TotalPages,
+                        TotalResults = trending.TotalResults
+                    };
+                hasMoreResults = false;
+            }
+            else
+            {
+                var searchMediaType = mediaType == "all" ? "multi" : mediaType;
+                results = await ContentService.SearchAsync(
+                    query: searchQuery,
+                    page: currentPage,
+                    mediaType: searchMediaType,
+                    sortBy: sortBy,
+                    year: selectedYear,
+                    pageSize: PageSize);
+
+                hasMoreResults = results != null && currentPage < results.TotalPages;
+            }
+
+            var newResults = ProcessResults(results?.Results);
+
+            if (currentPage == 1)
+            {
+                displayedResults = newResults;
+            }
+            else
+            {
+                displayedResults.AddRange(newResults);
+            }
+
+            filteredResults = SortDisplayedResults(displayedResults);
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Error loading search results");
+            errorMessage = $"An error occurred: {ex.Message}";
+            hasMoreResults = false;
+        }
+        finally
+        {
+            isLoading = false;
+            StateHasChanged();
+        }
+    }
+
+    private List<TmdbResult> ProcessResults(List<TmdbResult> results)
+    {
+        if (results == null) return new List<TmdbResult>();
+
+        return results.Where(r =>
+            r.MediaType != "person" &&
+            (!selectedYear.HasValue || MatchesYearFilter(r))
+        ).ToList();
+    }
+
+    private bool MatchesYearFilter(TmdbResult result)
+    {
+        if (!DateTime.TryParse(result.ReleaseDate ?? result.FirstAirDate, out var date))
+            return false;
+
+        return date.Year == selectedYear.Value;
+    }
+
+    private List<TmdbResult> SortDisplayedResults(List<TmdbResult> results)
+    {
+        if (string.IsNullOrEmpty(sortBy))
+            return results;
+
+        return sortBy switch
+        {
+            "popularity.desc" => results.OrderByDescending(r => r.Popularity).ToList(),
+            "vote_average.desc" => results
+                .Where(r => r.VoteCount >= MinVoteCount)
+                .OrderByDescending(r => r.VoteAverage)
+                .ToList(),
+            "title.asc" => results.OrderBy(r => (r.Title ?? r.Name)?.ToLower()).ToList(),
+            "release_date.desc" => results.OrderByDescending(r =>
+                DateTime.TryParse(r.ReleaseDate ?? r.FirstAirDate, out var date) ? date : DateTime.MinValue).ToList(),
+            "release_date.asc" => results.OrderBy(r =>
+                DateTime.TryParse(r.ReleaseDate ?? r.FirstAirDate, out var date) ? date : DateTime.MaxValue).ToList(),
+            _ => results
+        };
+    }
+}

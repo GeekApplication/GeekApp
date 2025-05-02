@@ -12,7 +12,8 @@ builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
 builder.Services.AddScoped<GeekApp.Server.Services.ITmdbService, GeekApp.Server.Services.TmdbService>(); // Add this
 builder.Services.AddScoped<GeekApp.Server.Services.CachedTmdbService>(); // If using caching
-builder.Services.AddMemoryCache(); // Required for CachedTmdbService
+builder.Services.AddMemoryCache();
+builder.Services.AddScoped<IContentService, ContentService>();
 builder.Services.AddScoped<BackendService>();
 builder.Services.AddHttpClient("Backend", client => 
 {

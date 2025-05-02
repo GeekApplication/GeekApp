@@ -1,1 +1,53 @@
-﻿
+﻿/* Scoped styles for NavMenu.razor */
+:host {
+    --tepapa-green: #203b44;
+    --gray-dark: #1f2937;
+    --gray-light: #d1d5db;
+}
+
+.navbar-dark {
+    background-color: var(--tepapa-green);
+}
+
+.search-input {
+    max-width: 300px;
+}
+
+.search-suggestions {
+    top: 100%;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.search-suggestion {
+    transition: background-color 0.2s ease;
+}
+
+    .search-suggestion:hover {
+        background-color: #2d3748;
+    }
+
+.suggestion-img {
+    width: 50px;
+    height: 75px;
+    object-fit: cover;
+}
+
+.text-sm {
+    font-size: 0.875rem;
+}
+
+.orbitron {
+    font-family: 'Orbitron', sans-serif;
+}
+
+.bg-gray-800 {
+    background-color: var(--gray-dark);
+}
+
+.text-gray-400 {
+    color: var(--gray-light);
+}

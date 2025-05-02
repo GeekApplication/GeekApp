@@ -36,7 +36,7 @@ builder.Services.AddScoped<ITmdbService>(provider =>
         provider.GetRequiredService<IMemoryCache>(),
         provider.GetRequiredService<ILogger<CachedTmdbService>>()));
 
-builder.Services.AddSingleton<IGenreService, GenreService>();
+//builder.Services.AddSingleton<IGenreService, GenreService>();
 
 // Add Authentication & Authorization
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)

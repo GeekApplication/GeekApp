@@ -3,7 +3,7 @@ using GeekApp.Shared.DTOs;
 using Microsoft.AspNetCore.Components;
 using System.Net.Http.Headers;
 
-
+namespace GeekApp.Services;
 
 public class AuthService : IAuthService
 {

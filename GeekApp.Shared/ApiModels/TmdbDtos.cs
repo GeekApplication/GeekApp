@@ -147,6 +147,78 @@ namespace GeekApp.Shared.ApiModels
         public List<TmdbVideo> Results { get; set; }
     }
 
+    public class TmdbResult
+    {
+        [JsonProperty("id")]
+        public int Id { get; set; }
+
+        [JsonProperty("title")]
+        public string Title { get; set; }
+
+        [JsonProperty("name")]
+        public string Name { get; set; }
+
+        [JsonProperty("poster_path")]
+        public string PosterPath { get; set; }
+
+        [JsonProperty("backdrop_path")]
+        public string BackdropPath { get; set; }
+
+        [JsonProperty("overview")]
+        public string Overview { get; set; }
+
+        [JsonProperty("release_date")]
+        public string ReleaseDate { get; set; }
+
+        [JsonProperty("first_air_date")]
+        public string FirstAirDate { get; set; }
+
+        [JsonProperty("media_type")]
+        public string MediaType { get; set; }
+
+        [JsonProperty("vote_average")]
+        public double VoteAverage { get; set; }
+
+        [JsonProperty("vote_count")]
+        public int VoteCount { get; set; }
+
+        [JsonProperty("popularity")]
+        public double Popularity { get; set; }
+    }
+
+    public class TmdbResponse
+    {
+        [JsonProperty("page")]
+        public int Page { get; set; }
+
+        [JsonProperty("results")]
+        public List<TmdbResult> Results { get; set; }
+
+        [JsonProperty("total_pages")]
+        public int TotalPages { get; set; }
+
+        [JsonProperty("total_results")]
+        public int TotalResults { get; set; }
+
+        [JsonProperty("min_vote_count")]
+        public int minVoteCount { get; set; } = 300;
+    }
+
+    public class TmdbSearchResult
+    {
+        [JsonProperty("page")]
+        public int Page { get; set; }
+
+        [JsonProperty("results")]
+        public List<TmdbResult> Results { get; set; }
+
+        [JsonProperty("total_pages")]
+        public int TotalPages { get; set; }
+
+        [JsonProperty("total_results")]
+        public int TotalResults { get; set; }
+    }
+
     public class TmdbContentDetails
     {
         [JsonProperty("id")]
@@ -188,6 +260,18 @@ namespace GeekApp.Shared.ApiModels
         [JsonProperty("episode_run_time")]
         public List<int> EpisodeRunTime { get; set; }
 
+        [JsonProperty("vote_average")]
+        public double VoteAverage { get; set; }
+
+        [JsonProperty("vote_count")]
+        public int VoteCount { get; set; }
+
+        [JsonProperty("status")]
+        public string Status { get; set; }
+
+        [JsonProperty("production_companies")]
+        public List<TmdbProductionCompany> ProductionCompanies { get; set; }
+
         [JsonProperty("seasons")]
         public List<TmdbSeason> Seasons { get; set; }
 
@@ -197,88 +281,23 @@ namespace GeekApp.Shared.ApiModels
         [JsonProperty("number_of_episodes")]
         public int? NumberOfEpisodes { get; set; }
 
-        [JsonProperty("vote_average")]
-        public double VoteAverage { get; set; }
-
-        [JsonProperty("vote_count")]
-        public int VoteCount { get; set; }
-
-        [JsonProperty("tagline")]
-        public string Tagline { get; set; }
-
-        [JsonProperty("status")]
-        public string Status { get; set; }
+        [JsonProperty("videos")]
+        public TmdbVideoResponse Videos { get; set; }
 
         [JsonProperty("budget")]
         public long? Budget { get; set; }
 
+        [JsonProperty("tagline")]
+        public string Tagline { get; set; }
+
         [JsonProperty("revenue")]
         public long? Revenue { get; set; }
-
-        [JsonProperty("production_companies")]
-        public List<TmdbProductionCompany> ProductionCompanies { get; set; }
-
-        [JsonProperty("videos")]
-        public TmdbVideoResponse Videos { get; set; }
-    }
-
-    public class TmdbResult
-    {
-        [JsonProperty("id")]
-        public int Id { get; set; }
-
-        [JsonProperty("title")]
-        public string Title { get; set; }
-
-        [JsonProperty("name")]
-        public string Name { get; set; }
-
-        [JsonProperty("overview")]
-        public string Overview { get; set; }
-
-        [JsonProperty("poster_path")]
-        public string PosterPath { get; set; }
-
-        [JsonProperty("backdrop_path")]
-        public string BackdropPath { get; set; }
-
-        [JsonProperty("genre_ids")]
-        public List<int> GenreIds { get; set; }
-
-        [JsonProperty("release_date")]
-        public string ReleaseDate { get; set; }
-
-        [JsonProperty("first_air_date")]
-        public string FirstAirDate { get; set; }
-
-        [JsonProperty("vote_average")]
-        public double VoteAverage { get; set; }
-    }
-
-    public class TmdbResponse
-    {
-        [JsonProperty("page")]
-        public int Page { get; set; }
-
-        [JsonProperty("results")]
-        public List<TmdbResult> Results { get; set; }
-
-        [JsonProperty("total_pages")]
-        public int TotalPages { get; set; }
-
-        [JsonProperty("total_results")]
-        public int TotalResults { get; set; }
     }
 
     public class TmdbRoot
     {
-        [JsonProperty("details")]
         public TmdbContentDetails Details { get; set; }
-
-        [JsonProperty("credits")]
         public TmdbCredits Credits { get; set; }
-
-        [JsonProperty("similar")]
         public TmdbResponse Similar { get; set; }
     }
 }
