@@ -5,6 +5,7 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.JSInterop;
 
+namespace GeekApp.Services;
 public class JwtAuthStateProvider : AuthenticationStateProvider
 {
     private readonly IJSRuntime _js;

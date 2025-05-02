@@ -1,7 +1,8 @@
-﻿@page "/title/{MediaType}/{Id:int}"
+﻿@page "/{MediaType}/{Id:int}"
 @using GeekApp.Shared.ApiModels
 @inject HttpClient Http
 @inject NavigationManager Navigation
+@inject IJSRuntime JSRuntime
 
 @if (isLoading)
 {
@@ -23,7 +24,7 @@ else if (titleData != null)
     <div class="min-vh-100 bg-tepapa-green text-white">
         <!-- Hero Section with Backdrop -->
         <div class="position-relative hero-section">
-            <img src="@titleData.Details.BackdropPath" alt="Backdrop" class="position-absolute w-100 h-100 object-fit-cover opacity-25" />
+            <img src="@titleData.Details.BackdropPath" alt="Backdrop" class="position-absolute w-100 h-100 object-fit-cover opacity-30" />
             <div class="container py-5 py-md-6 position-relative">
                 <div class="row g-4 align-items-center">
                     <div class="col-md-4">
@@ -31,31 +32,130 @@ else if (titleData != null)
                     </div>
                     <div class="col-md-8">
                         <h1 class="display-4 fw-bold mb-3 orbitron">@(titleData.Details.Title ?? titleData.Details.Name)</h1>
-                        <p class="lead text-gray-200 mb-4">@titleData.Details.Overview</p>
+                        @if (!string.IsNullOrEmpty(titleData.Details.Tagline))
+                        {
+                            <p class="lead text-gray-200 mb-3 fst-italic">"@titleData.Details.Tagline"</p>
+                        }
+                        <p class="text-gray-200 mb-4">@titleData.Details.Overview</p>
                         <div class="row g-3">
                             <div class="col-sm-6">
-                                <p><strong>Genres:</strong> @string.Join(", ", titleData.Details.Genres.Select(g => g.Name))</p>
+                                <p><strong>Genres:</strong> @string.Join(", ", titleData.Details.Genres?.Select(g => g.Name) ?? new List<string>())</p>
                             </div>
                             <div class="col-sm-6">
-                                <p><strong>Release Date:</strong> @(titleData.Details.ReleaseDate ?? titleData.Details.FirstAirDate)</p>
+                                <p><strong>@(MediaType.ToLower() == "movie" ? "Release Date" : "First Air Date"):</strong> @(titleData.Details.ReleaseDate ?? titleData.Details.FirstAirDate ?? "N/A")</p>
                             </div>
                             <div class="col-sm-6">
-                                <p><strong>Rating:</strong> @titleData.Details.VoteAverage.ToString("0.0")/10</p>
+                                <p><strong>Rating:</strong> @titleData.Details.VoteAverage.ToString("0.0")/10 (@titleData.Details.VoteCount votes)</p>
                             </div>
                             <div class="col-sm-6">
-                                <p><strong>Runtime:</strong> @titleData.Details.Runtime minutes</p>
+                                @if (MediaType.ToLower() == "movie" && titleData.Details.Runtime.HasValue)
+                                {
+                                    <p><strong>Runtime:</strong> @titleData.Details.Runtime.Value minutes</p>
+                                }
+                                else if (MediaType.ToLower() == "tv" && titleData.Details.EpisodeRunTime?.Any() == true)
+                                {
+                                    <p><strong>Episode Runtime:</strong> @string.Join(", ", titleData.Details.EpisodeRunTime.Select(t => $"{t} min"))</p>
+                                }
                             </div>
+                            @if (MediaType.ToLower() == "movie")
+                            {
+                                <div class="col-sm-6">
+                                    <p><strong>Budget:</strong> @(titleData.Details.Budget.HasValue ? $"${titleData.Details.Budget.Value:N0}" : "N/A")</p>
+                                </div>
+                                <div class="col-sm-6">
+                                    <p><strong>Revenue:</strong> @(titleData.Details.Revenue.HasValue ? $"${titleData.Details.Revenue.Value:N0}" : "N/A")</p>
+                                </div>
+                            }
+                            <div class="col-sm-6">
+                                <p><strong>Status:</strong> @titleData.Details.Status</p>
+                            </div>
+                            @if (MediaType.ToLower() == "tv" && titleData.Details.NumberOfSeasons.HasValue)
+                            {
+                                <div class="col-sm-6">
+                                    <p><strong>Seasons:</strong> @titleData.Details.NumberOfSeasons.Value</p>
+                                </div>
+                                <div class="col-sm-6">
+                                    <p><strong>Episodes:</strong> @(titleData.Details.NumberOfEpisodes.HasValue ? titleData.Details.NumberOfEpisodes.Value.ToString() : "N/A")</p>
+                                </div>
+                            }
                         </div>
                     </div>
                 </div>
             </div>
         </div>
 
+        <!-- Production Companies -->
+        @if (titleData.Details.ProductionCompanies?.Any() == true)
+        {
+            <div class="container py-5 bg-gray-900">
+                <h2 class="h3 fw-bold mb-4 orbitron">Production Companies</h2>
+                <div class="row row-cols-2 row-cols-sm-3 row-cols-md-4 g-4">
+                    @foreach (var company in titleData.Details.ProductionCompanies)
+                    {
+                        <div class="col">
+                            <div class="company-card bg-gray-800 rounded-3 shadow-sm p-3 text-center">
+                                @if (!string.IsNullOrEmpty(company.LogoPath))
+                                {
+                                    <img src="@company.LogoPath" alt="@company.Name" class="img-fluid mb-2 company-logo" />
+                                }
+                                <p class="fw-medium text-white mb-0">@company.Name</p>
+                                <p class="text-sm text-gray-400">@company.OriginCountry</p>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        }
+
+        <!-- Videos -->
+        @if (titleData.Details.Videos?.Results?.Any(v => v.Site == "YouTube" && v.Type == "Trailer") == true)
+        {
+            <div class="container py-5">
+                <h2 class="h3 fw-bold mb-4 orbitron">Trailers</h2>
+                <div class="row g-4">
+                    @foreach (var video in titleData.Details.Videos.Results.Where(v => v.Site == "YouTube" && v.Type == "Trailer").Take(3))
+                    {
+                        <div class="col-md-6 col-lg-4">
+                            <div class="video-card bg-gray-800 rounded-3 shadow-sm">
+                                <iframe class="w-100 rounded-top" height="200" src="https://www.youtube.com/embed/@video.Key" title="@video.Name" frameborder="0" allowfullscreen></iframe>
+                                <div class="p-3">
+                                    <p class="fw-medium text-white mb-0">@video.Name</p>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        }
+
+        <!-- Seasons (TV Only) -->
+        @if (MediaType.ToLower() == "tv" && titleData.Details.Seasons?.Any() == true)
+        {
+            <div class="container py-5 bg-gray-900">
+                <h2 class="h3 fw-bold mb-4 orbitron">Seasons</h2>
+                <div class="row row-cols-2 row-cols-sm-3 row-cols-md-4 g-4">
+                    @foreach (var season in titleData.Details.Seasons)
+                    {
+                        <div class="col">
+                            <div class="season-card bg-gray-800 rounded-3 shadow-sm text-center cursor-pointer" @onclick="() => ShowSeasonModal(season)">
+                                <img src="@season.PosterPath" alt="@season.Name" class="img-fluid rounded-top season-img" />
+                                <div class="p-3">
+                                    <p class="fw-medium text-white mb-1">@season.Name</p>
+                                    <p class="text-sm text-gray-400">@season.EpisodeCount episodes</p>
+                                    <p class="text-sm text-gray-400">@season.AirDate</p>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        }
+
         <!-- Cast Section -->
         <div class="container py-5">
             <h2 class="h3 fw-bold mb-4 orbitron">Cast</h2>
             <div class="row row-cols-2 row-cols-sm-3 row-cols-md-4 row-cols-lg-5 g-4">
-                @foreach (var cast in titleData.Credits.Cast.Take(10))
+                @foreach (var cast in titleData.Credits.Cast?.Take(15) ?? new List<TmdbCast>())
                 {
                     <div class="col">
                         <div class="cast-card bg-gray-800 rounded-3 shadow-sm text-center">
@@ -74,7 +174,7 @@ else if (titleData != null)
         <div class="container py-5 bg-gray-900">
             <h2 class="h3 fw-bold mb-4 orbitron">Crew</h2>
             <div class="row row-cols-2 row-cols-sm-3 row-cols-md-4 row-cols-lg-5 g-4">
-                @foreach (var crew in titleData.Credits.Crew.Take(10))
+                @foreach (var crew in titleData.Credits.Crew?.Take(15) ?? new List<TmdbCrew>())
                 {
                     <div class="col">
                         <div class="crew-card bg-gray-800 rounded-3 shadow-sm p-3">
@@ -90,10 +190,10 @@ else if (titleData != null)
         <div class="container py-5">
             <h2 class="h3 fw-bold mb-4 orbitron">Similar Titles</h2>
             <div class="row row-cols-2 row-cols-sm-3 row-cols-md-4 row-cols-lg-5 g-4">
-                @foreach (var similar in titleData.Similar.Results.Take(10))
+                @foreach (var similar in titleData.Similar?.Results?.Take(15) ?? new List<TmdbResult>())
                 {
                     <div class="col">
-                        <a href="/title/@MediaType/@similar.Id" class="similar-card bg-gray-800 rounded-3 shadow-sm text-center text-decoration-none">
+                        <a href="/@MediaType/@similar.Id" class="similar-card bg-gray-800 rounded-3 shadow-sm text-center text-decoration-none">
                             <img src="@similar.PosterPath" alt="@(similar.Title ?? similar.Name)" class="img-fluid rounded-top similar-img" />
                             <div class="p-3">
                                 <p class="fw-medium text-white mb-0">@(similar.Title ?? similar.Name)</p>
@@ -103,6 +203,44 @@ else if (titleData != null)
                 }
             </div>
         </div>
+
+        <!-- Season Modal -->
+        @if (selectedSeason != null)
+        {
+            <div class="modal fade show d-block" tabindex="-1" role="dialog" style="background-color: rgba(0,0,0,0.5);">
+                <div class="modal-dialog modal-lg">
+                    <div class="modal-content bg-gray-900 text-white">
+                        <div class="modal-header">
+                            <h5 class="modal-title orbitron">@selectedSeason.Name</h5>
+                            <button type="button" class="btn-close btn-close-white" @onclick="CloseSeasonModal"></button>
+                        </div>
+                        <div class="modal-body">
+                            <p>@selectedSeason.Overview</p>
+                            <h6 class="fw-bold mb-3 orbitron">Episodes</h6>
+                            <div class="row g-4">
+                                @foreach (var episode in selectedSeason.Episodes ?? new List<TmdbEpisode>())
+                                {
+                                    <div class="col-md-6">
+                                        <a href="/tv/@Id/season/@selectedSeason.SeasonNumber/episode/@episode.EpisodeNumber" class="episode-card bg-gray-800 rounded-3 shadow-sm text-decoration-none">
+                                            <div class="row g-0">
+                                                <div class="col-4">
+                                                    <img src="@episode.StillPath" alt="@episode.Name" class="img-fluid rounded-start episode-img" />
+                                                </div>
+                                                <div class="col-8 p-3">
+                                                    <p class="fw-medium text-white mb-1">Episode @episode.EpisodeNumber: @episode.Name</p>
+                                                    <p class="text-sm text-gray-400 mb-1">@episode.AirDate</p>
+                                                    <p class="text-sm text-gray-400 text-truncate">@episode.Overview</p>
+                                                </div>
+                                            </div>
+                                        </a>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
     </div>
 }
 
@@ -116,6 +254,7 @@ else if (titleData != null)
     private TmdbRoot titleData;
     private bool isLoading = true;
     private string errorMessage;
+    private TmdbSeason selectedSeason;
 
     protected override async Task OnParametersSetAsync()
     {
@@ -128,6 +267,7 @@ else if (titleData != null)
         {
             isLoading = true;
             errorMessage = null;
+            selectedSeason = null;
 
             var response = await Http.GetAsync($"https://localhost:7282/api/tmdb/title/{MediaType}/{Id}");
             if (response.IsSuccessStatusCode)
@@ -147,5 +287,15 @@ else if (titleData != null)
         {
             isLoading = false;
         }
+    }
+
+    private void ShowSeasonModal(TmdbSeason season)
+    {
+        selectedSeason = season;
+    }
+
+    private void CloseSeasonModal()
+    {
+        selectedSeason = null;
     }
 }
