@@ -87,7 +87,7 @@ else if (titleData != null)
         <!-- Production Companies -->
         @if (titleData.Details.ProductionCompanies?.Any() == true)
         {
-            <div class="container py-5 bg-gray-900">
+            <div class="container py-5 ">
                 <h2 class="h3 fw-bold mb-4 orbitron">Production Companies</h2>
                 <div class="row row-cols-2 row-cols-sm-3 row-cols-md-4 g-4">
                     @foreach (var company in titleData.Details.ProductionCompanies)
@@ -171,13 +171,13 @@ else if (titleData != null)
         </div>
 
         <!-- Crew Section -->
-        <div class="container py-5 bg-gray-900">
+        <div class=" crew-card container py-5 bg-gray-900">
             <h2 class="h3 fw-bold mb-4 orbitron">Crew</h2>
             <div class="row row-cols-2 row-cols-sm-3 row-cols-md-4 row-cols-lg-5 g-4">
                 @foreach (var crew in titleData.Credits.Crew?.Take(15) ?? new List<TmdbCrew>())
                 {
                     <div class="col">
-                        <div class="crew-card bg-gray-800 rounded-3 shadow-sm p-3">
+                        <div class="bg-gray-800 rounded-3 shadow-sm p-3">
                             <p class="fw-medium text-white mb-1">@crew.Name</p>
                             <p class="text-sm text-gray-400">@crew.Job (@crew.Department)</p>
                         </div>

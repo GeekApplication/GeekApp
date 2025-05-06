@@ -7,7 +7,7 @@
 }
 
 .bg-tepapa-green {
-    background-color: var(--tepapa-green);
+    background: linear-gradient(120deg, #0f2027, #203a43, #2c5364);
 }
 
 .btn-light-blue {
@@ -19,17 +19,10 @@
         background-color: #3b82f6;
     }
 
-.result-card {
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-
-    .result-card:hover {
-        transform: scale(1.05);
-        box-shadow: 0 4px 20px rgba(96, 165, 250, 0.5);
-    }
+    
 
 .result-img {
-    height: 250px;
+    
     object-fit: cover;
 }
 
@@ -67,4 +60,133 @@
     .result-img {
         height: 300px;
     }
+}
+
+.genre-checkboxes {
+    border: 1px solid white; /* Vit tunn border */
+    border-radius: 0.75rem; /* Rundade hörn */
+    padding: 1rem;
+    background-color: rgba(255, 255, 255, 0.03); /* Lätt bakgrund för kontrast */
+    max-height: 150px;
+    overflow-y: auto;
+}
+
+/* Styla enskilda checkboxar */
+.form-check {
+    margin-bottom: 0.5rem;
+}
+
+.form-check-input {
+    accent-color: #00b4ff; /* Modern blå accentfärg */
+    transform: scale(1.2); /* Gör checkboxen lite större */
+    margin-right: 0.5rem;
+}
+
+.form-check-label {
+    color: white;
+    font-weight: 500;
+    font-family: 'Orbitron', sans-serif; /* Om du använder Orbitron-fonten */
+    font-size: 0.95rem;
+}
+
+/* Stil för labeln över checkboxarna */
+.form-label {
+    color: #ffffff;
+    font-weight: 600;
+    font-size: 1.1rem;
+    margin-bottom: 0.5rem;
+    display: block;
+}
+
+.apply-btn {
+    color: lightblue;
+    background: linear-gradient(145deg, rgba(173, 216, 230, 0.1), transparent);
+    border: 1px solid lightblue;
+    height: 40px;
+    border-radius: 6px;
+    padding: 0 16px;
+    font-size: 15px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+    .apply-btn:hover {
+        color: white;
+        background: linear-gradient(145deg, rgba(173, 216, 230, 0.2), rgba(59, 130, 246, 0.2));
+        border-color: white;
+        transform: scale(1.05) translateY(-2px);
+        cursor: pointer;
+        box-shadow: 0 0 10px rgba(173, 216, 230, 0.7), 0 0 20px rgba(173, 216, 230, 0.5), 0 0 30px rgba(173, 216, 230, 0.3);
+    }
+
+.input-group {
+    display: flex;
+    gap: 0.5rem; /* Skapar horisontellt mellanrum mellan inputs och knappen */
+    flex-wrap: wrap;
+}
+
+.refresh-btn {
+    color: lightblue;
+    background: linear-gradient(145deg, rgba(173, 216, 230, 0.1), transparent);
+    border: 1px solid lightblue;
+    height: 40px;
+    border-radius: 6px;
+    padding: 0 16px;
+    font-size: 15px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+    .refresh-btn:hover {
+        color: white;
+        background: linear-gradient(145deg, rgba(173, 216, 230, 0.2), rgba(59, 130, 246, 0.2));
+        border-color: white;
+        transform: scale(1.05) translateY(-2px);
+        cursor: pointer;
+        box-shadow: 0 0 10px rgba(173, 216, 230, 0.7), 0 0 20px rgba(173, 216, 230, 0.5), 0 0 30px rgba(173, 216, 230, 0.3);
+    }
+
+.movie-cards {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    justify-content: center;
+    
+}
+
+.result-card {
+    border: 5px solid rgba(255, 255, 255, 0.2);
+    border-radius: 0.75rem;
+   
+    background-color: #1f2937;
+    transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+    text-decoration: none;
+    position: relative;
+}
+
+    .result-card:hover {
+        transform: translateY(-4px);
+        border-color: white;
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3), 0 0 25px rgba(0, 149, 255, 0.6), 0 0 40px rgba(0, 149, 255, 0.4);
+        filter: brightness(1.05) saturate(1.1);
+    }
+
+.result-img {
+    height: auto;
+    border-top-left-radius: 0.75rem;
+    border-top-right-radius: 0.75rem;
+    display: block;
+}
+
+.card-text {
+    background-color: #192c33;
+    margin-bottom: 30px;
+}
+
+.title-name {
+    font-size: 20px;
 }

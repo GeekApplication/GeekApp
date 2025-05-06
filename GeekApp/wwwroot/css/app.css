@@ -31,19 +31,16 @@ h1:focus {
 
 /* Custom theme colors */
 :root {
-    --bs-primary: #2c3e50;
-    --bs-primary-rgb: 44, 62, 80;
-    --bs-primary-dark: #1a252f;
-    --bs-cyan: #00ffff;
+    background: linear-gradient(120deg, #0f2027, #203a43, #2c5364);
 }
 
 .bg-primary {
-    background-color: var(--bs-primary) !important;
+    background: linear-gradient(120deg, #0f2027, #203a43, #2c5364);
 }
 
 /* Enhanced Navbar Styles */
 .navbar {
-    background: rgba(44, 62, 80, 0.95) !important;
+    background: linear-gradient(120deg, #0f2027, #203a43);
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
@@ -158,13 +155,14 @@ h1:focus {
 }
 
 body {
-    background-color: var(--bs-primary);
+    background: linear-gradient(-45deg, #0f2027, #203a43, #2c5364, #1b2d33);
+    background-size: 400% 400%;
+    animation: gradientShift 18s ease infinite;
+    background-attachment: fixed;
     color: #f0f8ff;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-family: 'Orbitron', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     margin: 0;
     padding: 0;
-    background: linear-gradient(135deg, #1e3c72, #2a5298) !important;
-    background-attachment: fixed !important;
 }
 h1, h2, h3, h4, h5, h6 {
     color: var(--dark-color);
@@ -199,3 +197,97 @@ a {
         margin: 0;
         padding-left: 1.5rem;
     }
+
+@keyframes gradientShift {
+    0% {
+        background-position: 0% 50%;
+    }
+
+    50% {
+        background-position: 100% 50%;
+    }
+
+    100% {
+        background-position: 0% 50%;
+    }
+}
+
+/* [Previous CSS content remains exactly the same until the end] */
+
+/* ===================== */
+/* FOOTER STYLES */
+/* ===================== */
+
+/* FOOTER STYLES */
+/* Simplified Footer Styles */
+.site-footer {
+    background: linear-gradient(120deg, #0f2027, #203a43);
+    color: #f0f8ff;
+    padding: 1.5rem 0;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    font-size: 0.9rem;
+}
+
+.footer-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 1rem;
+}
+
+.footer-line {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    gap: 1.5rem;
+}
+
+.footer-legal a,
+.footer-connect a,
+.copyright {
+    color: rgba(255, 255, 255, 0.7);
+    text-decoration: none;
+    transition: all 0.3s ease;
+}
+
+    .footer-legal a:hover,
+    .footer-connect a:hover {
+        color: var(--bs-cyan);
+        text-shadow: 0 0 6px var(--bs-highlight);
+    }
+
+.divider {
+    margin: 0 0.5rem;
+    color: rgba(255, 255, 255, 0.4);
+}
+
+.footer-connect {
+    display: flex;
+    gap: 1rem;
+}
+
+.social-icon {
+    font-size: 1.1rem;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .footer-line {
+        flex-direction: column;
+        gap: 0.8rem;
+    }
+
+    .divider {
+        display: none;
+    }
+
+    .footer-legal {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.5rem;
+    }
+}
+

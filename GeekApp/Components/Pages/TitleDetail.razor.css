@@ -1,143 +1,99 @@
-﻿/* Scoped styles for TitleDetail.razor */
-:host {
-    --tepapa-green: #203b44;
-    --light-blue: #60a5fa;
-    --gray-dark: #1f2937;
-    --gray-light: #d1d5db;
+﻿/* General */
+body {
+    font-family: 'Orbitron', sans-serif;
 }
 
-/* Background and text colors */
 .bg-tepapa-green {
-    background-color: var(--tepapa-green);
-}
-
-.text-tepapa-green {
-    color: var(--tepapa-green);
-}
-
-.bg-gray-800 {
-    background-color: var(--gray-dark);
-}
-
-.bg-gray-900 {
-    background-color: #111827;
-}
-
-.text-gray-400 {
-    color: var(--gray-light);
-}
-
-.text-gray-200 {
-    color: #e5e7eb;
+    background: linear-gradient(120deg, #0f2027, #203a43, #2c5364);
 }
 
 .text-light-blue {
-    color: var(--light-blue);
+    color: #6ec1e4;
 }
 
-/* Hero section */
+.bg-gray-800 {
+    background-color: #2d2d2d;
+}
+
+.bg-gray-900 {
+    background-color: #1a1a1a;
+}
+
+.text-gray-200 {
+    color: #cccccc;
+}
+
+.text-gray-400 {
+    color: #999999;
+}
+
+.rounded-3 {
+    border-radius: 1rem !important;
+}
+
+.shadow-sm {
+    box-shadow: 0 0.25rem 0.5rem rgba(0, 0, 0, 0.15) !important;
+}
+
+/* Poster and Hero */
 .hero-section {
-    background: linear-gradient(to bottom, rgba(0, 0, 0, 0.7), var(--tepapa-green));
-    min-height: 500px;
+    height: 100vh;
     overflow: hidden;
 }
 
-    .hero-section img.object-fit-cover {
-        object-fit: cover;
-        object-position: center;
+.poster-img, .season-img, .cast-img, .similar-img, .company-logo, .episode-img {
+    transition: transform 0.3s ease;
+    object-fit: cover;
+    width: 100%;
+    height: auto;
+}
+
+    .poster-img:hover,
+    .season-img:hover,
+    .cast-img:hover,
+    .similar-img:hover,
+    .company-logo:hover,
+    .episode-img:hover {
+        transform: scale(1.05);
     }
 
-/* Card styles */
-.cast-card, .crew-card, .similar-card, .company-card, .season-card, .video-card, .episode-card {
+/* Card Effects */
+.company-card,
+.video-card,
+.season-card,
+.cast-card,
+.crew-card,
+.similar-card,
+.episode-card {
     transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
-    .cast-card:hover, .crew-card:hover, .similar-card:hover, .company-card:hover, .season-card:hover, .video-card:hover, .episode-card:hover {
-        transform: scale(1.05);
-        box-shadow: 0 4px 20px rgba(96, 165, 250, 0.5); /* Light blue shadow */
+    .company-card:hover,
+    .video-card:hover,
+    .season-card:hover,
+    .cast-card:hover,
+    .crew-card:hover,
+    .similar-card:hover,
+    .episode-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
     }
 
-/* Image styles */
-.poster-img, .cast-img, .similar-img, .season-img, .episode-img {
-    transition: transform 0.3s ease;
-}
-
-    .poster-img:hover, .cast-img:hover, .similar-img:hover, .season-img:hover, .episode-img:hover {
-        transform: scale(1.05);
-    }
-
-.cast-img, .similar-img, .season-img, .episode-img {
-    height: 250px;
-    object-fit: cover;
-}
-
-.poster-img {
-    max-height: 450px;
-    object-fit: cover;
-}
-
-.company-logo {
-    max-height: 80px;
-    object-fit: contain;
-}
-
-/* Typography */
+/* Text Styling */
 .orbitron {
     font-family: 'Orbitron', sans-serif;
 }
 
-/* Loading spinner */
-.spinner-border {
-    border-width: 0.2rem;
+/* Responsive modal overlay fix */
+.modal.show.d-block {
+    overflow-y: auto;
 }
 
-/* Video iframe */
-.video-card iframe {
-    aspect-ratio: 16 / 9;
-}
-
-/* Modal */
-.modal-content {
-    border: none;
-    border-radius: 0.5rem;
-}
-
-/* Episode card */
-.episode-card {
-    display: block;
-}
-
-.episode-img {
-    height: 150px;
-}
-
-/* Responsive adjustments */
-@media (max-width: 576px) {
-    .cast-img, .similar-img, .season-img, .episode-img {
-        height: 200px;
-    }
-
-    .poster-img {
-        max-height: 350px;
-    }
-
-    .hero-section {
-        min-height: 400px;
-    }
-}
-
-@media (min-width: 992px) {
-    .cast-img, .similar-img, .season-img {
-        height: 300px;
-    }
-}
-
-/* Ensure cards are clickable */
-.similar-card, .season-card, .episode-card {
+/* Utility */
+.cursor-pointer {
     cursor: pointer;
 }
 
-/* Text sizes */
-.text-sm {
-    font-size: 0.875rem;
+.crew-card {
+    background: transparent;
 }

@@ -12,7 +12,7 @@
         <div class="mb-4">
             <form class="d-flex" @onsubmit="PerformSearch">
                 <input type="text" class="form-control search-input me-2" placeholder="Search movies, TV shows..." @bind="searchQuery" />
-                <button type="submit" class="btn btn-light-blue">Search</button>
+                <button type="submit" class="search-btn">Search</button>
             </form>
         </div>
 
@@ -40,12 +40,12 @@
                 <div class="col-md-3">
                     <label class="form-label">Year</label>
                     <div class="input-group">
-                        <input type="number" class="form-control" placeholder="Year" @bind="selectedYear" min="1900" max="@DateTime.Now.Year" />
-                        <button class="btn btn-light-blue" @onclick="ApplyYearFilter">Apply</button>
+                        <input type="number" class="form-control me-3" placeholder="Year" @bind="selectedYear" min="1900" max="@DateTime.Now.Year" />
                     </div>
-                </div>
-                <div class="col-md-3">
-                    <button class="btn btn-light-blue mt-4" @onclick="ForceRefresh">Refresh Results</button>
+                    <div class="d-flex gap-2 mt-2">
+                        <button class="apply-btn" @onclick="ApplyYearFilter">Apply</button>
+                        <button class="result-btn" @onclick="ForceRefresh">Refresh Results</button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -74,14 +74,14 @@
                 {
                     @if (result.MediaType != "person") @* Skip person results *@
                     {
-                        <div class="col">
-                            <a href="/@(result.MediaType ?? "movie")/@result.Id" class="result-card bg-gray-800 rounded-3 shadow-sm text-center text-decoration-none">
+                        <div class="movie-cards">
+                            <a href="/@(result.MediaType ?? "movie")/@result.Id" class="result-card">
                                 <img src="@result.PosterPath" alt="@(result.Title ?? result.Name ?? "Unknown")"
                                      class="img-fluid rounded-top result-img"
                                      onerror="this.src='/images/errorimage.jpg'" />
-                                <div class="p-3">
-                                    <p class="fw-medium text-white mb-1">@(result.Title ?? result.Name ?? "Unknown")</p>
-                                    <p class="text-sm text-gray-400 mb-0">
+                                <div class="card-text text-center mt-2">
+                                    <p class="title-name">@(result.Title ?? result.Name ?? "Unknown")</p>
+                                    <p class="rel-date">
                                         @(result.MediaType == "movie" ? "Movie" : "TV Show") - @(result.ReleaseDate ?? result.FirstAirDate ?? "N/A")
                                     </p>
                                 </div>

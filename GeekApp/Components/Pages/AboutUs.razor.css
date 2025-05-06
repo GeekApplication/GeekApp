@@ -1,0 +1,154 @@
+﻿/* About Us Page Styles */
+.about-container {
+    max-width: 1200px;
+    margin: 2rem auto;
+    padding: 0 1rem;
+}
+
+.about-header {
+    text-align: center;
+    margin-bottom: 3rem;
+}
+
+.about-title {
+    font-size: 2.5rem;
+    color: #4cc9f0;
+    margin-bottom: 1rem;
+    text-shadow: 0 0 10px rgba(76, 201, 240, 0.3);
+}
+
+.about-subtitle {
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 1.2rem;
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.about-card {
+    background: rgba(44, 62, 80, 0.6);
+    border-radius: 10px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+}
+
+.about-section-title {
+    color: #4cc9f0;
+    font-size: 1.5rem;
+    margin-bottom: 1.5rem;
+    border-bottom: 1px solid rgba(76, 201, 240, 0.3);
+    padding-bottom: 0.5rem;
+}
+
+.about-text {
+    color: rgba(255, 255, 255, 0.8);
+    line-height: 1.8;
+    margin-bottom: 1.5rem;
+}
+
+.contact-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
+    margin-top: 2rem;
+}
+
+.contact-card {
+    background: rgba(58, 134, 255, 0.1);
+    border-radius: 8px;
+    padding: 1.5rem;
+    border: 1px solid rgba(58, 134, 255, 0.2);
+    transition: all 0.3s ease;
+}
+
+    .contact-card:hover {
+        background: rgba(58, 134, 255, 0.2);
+        transform: translateY(-5px);
+    }
+
+.contact-icon {
+    font-size: 2rem;
+    color: #4cc9f0;
+    margin-bottom: 1rem;
+}
+
+.contact-title {
+    font-size: 1.2rem;
+    color: white;
+    margin-bottom: 0.5rem;
+}
+
+.contact-info {
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.contact-link {
+    color: #4cc9f0;
+    text-decoration: none;
+    transition: all 0.3s ease;
+}
+
+    .contact-link:hover {
+        color: white;
+        text-shadow: 0 0 8px rgba(76, 201, 240, 0.5);
+    }
+
+.team-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 2rem;
+    margin-top: 2rem;
+}
+
+.team-member {
+    text-align: center;
+}
+
+.team-avatar {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid rgba(76, 201, 240, 0.5);
+    margin-bottom: 1rem;
+}
+
+.team-name {
+    color: white;
+    font-size: 1.2rem;
+    margin-bottom: 0.25rem;
+}
+
+.team-position {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 0.9rem;
+    margin-bottom: 1rem;
+}
+
+.social-links {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+}
+
+.social-link {
+    color: rgba(255, 255, 255, 0.7);
+    transition: all 0.3s ease;
+}
+
+    .social-link:hover {
+        color: #4cc9f0;
+        transform: translateY(-3px);
+    }
+
+@@media (max-width: 768px) {
+    .about-title {
+        font-size: 2rem;
+    }
+
+    .about-subtitle {
+        font-size: 1rem;
+    }
+}

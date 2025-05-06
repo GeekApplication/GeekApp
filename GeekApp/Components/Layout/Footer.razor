@@ -1,0 +1,46 @@
+﻿@using Microsoft.AspNetCore.Components.Authorization
+@inject NavigationManager Navigation
+
+<footer class="site-footer">
+    <div class="footer-content">
+        <div class="footer-bottom">
+            <div class="footer-line">
+                <div class="footer-legal">
+                    <NavLink href="/about">About Us</NavLink>
+                    <span class="divider">|</span>
+                    <NavLink href="/privacy">Privacy Policy</NavLink>
+                    <span class="divider">|</span>
+                    <NavLink href="/terms">Terms of Service</NavLink>
+                    <span class="divider">|</span>
+                    <NavLink href="/cookies">Cookie Policy</NavLink>
+                </div>
+
+                <div class="footer-connect">
+                    <a href="https://twitter.com" target="_blank" class="social-icon">
+                        <i class="fab fa-twitter"></i>
+                    </a>
+                    <a href="https://facebook.com" target="_blank" class="social-icon">
+                        <i class="fab fa-facebook"></i>
+                    </a>
+                    <a href="https://instagram.com" target="_blank" class="social-icon">
+                        <i class="fab fa-instagram"></i>
+                    </a>
+                </div>
+
+                <div class="copyright">
+                    &copy; @DateTime.Now.Year GeekApp. All rights reserved.
+                </div>
+            </div>
+        </div>
+    </div>
+</footer>
+
+@code {
+    [Inject] private IAuthService AuthService { get; set; }
+
+    private async Task Logout()
+    {
+        await AuthService.LogoutAsync();
+        Navigation.NavigateTo("/", forceLoad: true);
+    }
+}

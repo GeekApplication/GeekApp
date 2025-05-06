@@ -1,12 +1,1 @@
 ﻿
-.home-container {
-    min-height: 100vh;
-    background: linear-gradient(120deg, #0f2027, #203a43, #2c5364);
-    background-size: 400% 400%;
-    animation: backgroundMove 15s ease infinite;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 2rem;
-    border-radius: 0.5rem;
-}
