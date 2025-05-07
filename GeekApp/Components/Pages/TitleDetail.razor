@@ -22,7 +22,6 @@ else if (errorMessage != null)
 else if (titleData != null)
 {
     <div class="min-vh-100 bg-tepapa-green text-white">
-        <!-- Hero Section with Backdrop -->
         <div class="position-relative hero-section">
             <img src="@titleData.Details.BackdropPath" alt="Backdrop" class="position-absolute w-100 h-100 object-fit-cover opacity-30" />
             <div class="container py-5 py-md-6 position-relative">
@@ -84,51 +83,64 @@ else if (titleData != null)
             </div>
         </div>
 
-        <!-- Production Companies -->
-        @if (titleData.Details.ProductionCompanies?.Any() == true)
-        {
-            <div class="container py-5 ">
-                <h2 class="h3 fw-bold mb-4 orbitron">Production Companies</h2>
-                <div class="row row-cols-2 row-cols-sm-3 row-cols-md-4 g-4">
-                    @foreach (var company in titleData.Details.ProductionCompanies)
-                    {
-                        <div class="col">
-                            <div class="company-card bg-gray-800 rounded-3 shadow-sm p-3 text-center">
-                                @if (!string.IsNullOrEmpty(company.LogoPath))
-                                {
-                                    <img src="@company.LogoPath" alt="@company.Name" class="img-fluid mb-2 company-logo" />
-                                }
-                                <p class="fw-medium text-white mb-0">@company.Name</p>
-                                <p class="text-sm text-gray-400">@company.OriginCountry</p>
-                            </div>
-                        </div>
-                    }
-                </div>
-            </div>
-        }
-
-        <!-- Videos -->
-        @if (titleData.Details.Videos?.Results?.Any(v => v.Site == "YouTube" && v.Type == "Trailer") == true)
-        {
-            <div class="container py-5">
-                <h2 class="h3 fw-bold mb-4 orbitron">Trailers</h2>
-                <div class="row g-4">
-                    @foreach (var video in titleData.Details.Videos.Results.Where(v => v.Site == "YouTube" && v.Type == "Trailer").Take(3))
-                    {
-                        <div class="col-md-6 col-lg-4">
-                            <div class="video-card bg-gray-800 rounded-3 shadow-sm">
-                                <iframe class="w-100 rounded-top" height="200" src="https://www.youtube.com/embed/@video.Key" title="@video.Name" frameborder="0" allowfullscreen></iframe>
-                                <div class="p-3">
-                                    <p class="fw-medium text-white mb-0">@video.Name</p>
+        <div class="container py-5">
+            <div class="row g-4">
+                @if (titleData.Details.ProductionCompanies?.Any() == true)
+                {
+                    <div class="col-md-6">
+                        <h2 class="h3 fw-bold mb-4 orbitron">Production Companies</h2>
+                        <div class="row row-cols-2 row-cols-sm-3 g-4">
+                            @foreach (var company in titleData.Details.ProductionCompanies.Take(6))
+                            {
+                                <div class="col">
+                                    <div class="company-card bg-gray-800 rounded-3 shadow-sm p-3 text-center" style="width: 200px; height: 150px;">
+                                        @if (!string.IsNullOrEmpty(company.LogoPath))
+                                        {
+                                            <img src="@company.LogoPath" alt="@company.Name" class="img-fluid mb-2 company-logo" />
+                                        }
+                                        <p class="fw-medium text-white mb-0">@company.Name</p>
+                                        <p class="text-sm text-gray-400">@company.OriginCountry</p>
+                                    </div>
                                 </div>
-                            </div>
+                            }
+                            @if (titleData.Details.ProductionCompanies.Count() > 6)
+                            {
+                                <div class="col-12 text-center mt-3">
+                                    <button class="btn btn-outline-info btn-sm">Show More Companies</button>
+                                </div>
+                            }
                         </div>
-                    }
-                </div>
-            </div>
-        }
+                    </div>
+                }
 
-        <!-- Seasons (TV Only) -->
+                @if (titleData.Details.Videos?.Results?.Any(v => v.Site == "YouTube" && v.Type == "Trailer") == true)
+                {
+                    <div class="col-md-6">
+                        <h2 class="h3 fw-bold mb-4 orbitron">Trailers</h2>
+                        <div class="row row-cols-1 g-4">
+                            @foreach (var video in titleData.Details.Videos.Results.Where(v => v.Site == "YouTube" && v.Type == "Trailer").Take(2))
+                            {
+                                <div class="col">
+                                    <div class="video-card bg-gray-800 rounded-3 shadow-sm">
+                                        <iframe class="w-100 rounded-top" height="200" src="https://www.youtube.com/embed/@video.Key" title="@video.Name" frameborder="0" allowfullscreen></iframe>
+                                        <div class="p-3">
+                                            <p class="fw-medium text-white mb-0">@video.Name</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                            @if (titleData.Details.Videos.Results.Count(v => v.Site == "YouTube" && v.Type == "Trailer") > 2)
+                            {
+                                <div class="col text-center mt-3">
+                                    <button class="btn btn-outline-danger btn-sm">More Trailers</button>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+
         @if (MediaType.ToLower() == "tv" && titleData.Details.Seasons?.Any() == true)
         {
             <div class="container py-5 bg-gray-900">
@@ -151,7 +163,6 @@ else if (titleData != null)
             </div>
         }
 
-        <!-- Cast Section -->
         <div class="container py-5">
             <h2 class="h3 fw-bold mb-4 orbitron">Cast</h2>
             <div class="row row-cols-2 row-cols-sm-3 row-cols-md-4 row-cols-lg-5 g-4">
@@ -170,23 +181,21 @@ else if (titleData != null)
             </div>
         </div>
 
-        <!-- Crew Section -->
-        <div class=" crew-card container py-5 bg-gray-900">
+        <div class=" crew-card container py-5" >
             <h2 class="h3 fw-bold mb-4 orbitron">Crew</h2>
             <div class="row row-cols-2 row-cols-sm-3 row-cols-md-4 row-cols-lg-5 g-4">
                 @foreach (var crew in titleData.Credits.Crew?.Take(15) ?? new List<TmdbCrew>())
                 {
                     <div class="col">
-                        <div class="bg-gray-800 rounded-3 shadow-sm p-3">
+                        <div class="bg-gray-800 rounded-3 shadow-sm p-3" style="background-color: black">
                             <p class="fw-medium text-white mb-1">@crew.Name</p>
-                            <p class="text-sm text-gray-400">@crew.Job (@crew.Department)</p>
+                            <p class="text-sm text-white">@crew.Job (@crew.Department)</p>
                         </div>
                     </div>
                 }
             </div>
         </div>
 
-        <!-- Similar Titles Section -->
         <div class="container py-5">
             <h2 class="h3 fw-bold mb-4 orbitron">Similar Titles</h2>
             <div class="row row-cols-2 row-cols-sm-3 row-cols-md-4 row-cols-lg-5 g-4">
@@ -204,7 +213,6 @@ else if (titleData != null)
             </div>
         </div>
 
-        <!-- Season Modal -->
         @if (selectedSeason != null)
         {
             <div class="modal fade show d-block" tabindex="-1" role="dialog" style="background-color: rgba(0,0,0,0.5);">
