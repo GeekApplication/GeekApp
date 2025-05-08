@@ -3,6 +3,7 @@ using GeekApp.Server.Services;
 using GeekApp.Shared.ApiModels;
 using Microsoft.Extensions.Logging;
 
+namespace GeekApp.Services;
 public class BackendService
 {
     private readonly HttpClient _http;

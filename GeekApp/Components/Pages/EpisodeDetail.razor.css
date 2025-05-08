@@ -1,0 +1,64 @@
+﻿/* Scoped styles for EpisodeDetail.razor */
+:host {
+    --tepapa-green: #203b44;
+    --light-blue: #60a5fa;
+    --gray-dark: #1f2937;
+    --gray-light: #d1d5db;
+}
+
+/* Background and text colors */
+.bg-tepapa-green {
+    background-color: var(--tepapa-green);
+}
+
+.text-gray-200 {
+    color: #e5e7eb;
+}
+
+.text-light-blue {
+    color: var(--light-blue);
+}
+
+/* Hero section */
+.hero-section {
+    background: linear-gradient(to bottom, rgba(0, 0, 0, 0.7), var(--tepapa-green));
+    min-height: 500px;
+    overflow: hidden;
+}
+
+    .hero-section img.object-fit-cover {
+        object-fit: cover;
+        object-position: center;
+    }
+
+/* Image styles */
+.episode-img {
+    transition: transform 0.3s ease;
+    max-height: 300px;
+    object-fit: cover;
+}
+
+    .episode-img:hover {
+        transform: scale(1.05);
+    }
+
+/* Typography */
+.orbitron {
+    font-family: 'Orbitron', sans-serif;
+}
+
+/* Loading spinner */
+.spinner-border {
+    border-width: 0.2rem;
+}
+
+/* Responsive adjustments */
+@media (max-width: 576px) {
+    .episode-img {
+        max-height: 250px;
+    }
+
+    .hero-section {
+        min-height: 400px;
+    }
+}
