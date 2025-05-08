@@ -19,6 +19,12 @@
                 <li class="nav-item">
                     <NavLink class="nav-link" href="/">Home</NavLink>
                 </li>
+                <li class="nav-item">
+                    <NavLink class="nav-link" href="/search">Search</NavLink>
+                </li>
+                <li class="nav-item">
+                    <NavLink class="nav-link" href="/discover">Discover</NavLink>
+                </li>
 
                 <AuthorizeView>
                     <Authorized>
@@ -28,6 +34,7 @@
                         <li class="nav-item">
                             <button class="btn btn-outline-light ms-2" @onclick="Logout">Logout</button>
                         </li>
+
                     </Authorized>
                     <NotAuthorized>
                         <li class="nav-item">
