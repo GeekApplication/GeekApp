@@ -1,4 +1,7 @@
-﻿@inject NavigationManager NavManager
+﻿@using GeekApp.Shared.ApiModels
+@inject IContentService ContentService
+@inject NavigationManager Navigation
+@inject IJSRuntime JSRuntime
 @inject IAuthService AuthService
 @using Microsoft.AspNetCore.Components.Authorization
 
@@ -34,7 +37,6 @@
                         <li class="nav-item">
                             <button class="btn btn-outline-light ms-2" @onclick="Logout">Logout</button>
                         </li>
-
                     </Authorized>
                     <NotAuthorized>
                         <li class="nav-item">
@@ -46,6 +48,26 @@
                     </NotAuthorized>
                 </AuthorizeView>
             </ul>
+            <div class="d-flex position-relative">
+                <input type="text" class="form-control search-input" placeholder="Search movies, TV shows..." @bind="searchQuery" @bind:event="oninput" @onkeyup="HandleSearchKeyUp" @onfocus="ShowSuggestions" @onblur="HideSuggestionsDelayed" />
+                @if (showSuggestions && searchResults?.Results?.Any() == true)
+                {
+                    <div class="search-suggestions position-absolute bg-gray-800 rounded-3 shadow-lg">
+                        @foreach (var result in searchResults.Results.Take(5))
+                        {
+                            <a href="/@(result.MediaType ?? "movie")/@result.Id" class="d-block search-suggestion text-white text-decoration-none p-2" @onclick="() => SelectSuggestion(result)">
+                                <div class="d-flex align-items-center">
+                                    <img src="@result.PosterPath" alt="@(result.Title ?? result.Name)" class="suggestion-img me-2" />
+                                    <div>
+                                        <p class="mb-0 fw-medium">@(result.Title ?? result.Name)</p>
+                                        <p class="text-sm text-gray-400 mb-0">@(result.MediaType == "movie" ? "Movie" : "TV") - @(result.ReleaseDate ?? result.FirstAirDate ?? "N/A")</p>
+                                    </div>
+                                </div>
+                            </a>
+                        }
+                    </div>
+                }
+            </div>
         </div>
     </div>
 </nav>
@@ -54,5 +76,73 @@
     private async Task Logout()
     {
         await AuthService.LogoutAsync();
+    }
+
+    private string searchQuery;
+    private TmdbSearchResult searchResults;
+    private bool showSuggestions;
+    private bool isSearching;
+
+    private async Task HandleSearchKeyUp(KeyboardEventArgs args)
+    {
+        if (args.Key == "Enter" && !string.IsNullOrWhiteSpace(searchQuery))
+        {
+            Navigation.NavigateTo($"/search/{Uri.EscapeDataString(searchQuery)}");
+            showSuggestions = false;
+            searchQuery = string.Empty;
+            searchResults = null;
+            return;
+        }
+
+        if (!string.IsNullOrWhiteSpace(searchQuery) && searchQuery.Length >= 2)
+        {
+            await SearchSuggestions();
+        }
+        else
+        {
+            searchResults = null;
+            showSuggestions = false;
+        }
+    }
+
+    private async Task SearchSuggestions()
+    {
+        try
+        {
+            isSearching = true;
+            searchResults = await ContentService.SearchAsync(
+                query: searchQuery,
+                page: 1,
+                mediaType: "multi");
+            showSuggestions = true;
+        }
+        catch (Exception)
+        {
+            searchResults = null;
+            showSuggestions = false;
+        }
+        finally
+        {
+            isSearching = false;
+        }
+    }
+    private void ShowSuggestions()
+    {
+        if (searchResults?.Results?.Any() == true)
+            showSuggestions = true;
+    }
+
+    private async Task HideSuggestionsDelayed()
+    {
+        await Task.Delay(200); // Allow clicking suggestions before hiding
+        showSuggestions = false;
+    }
+
+    private void SelectSuggestion(TmdbResult result)
+    {
+        searchQuery = string.Empty;
+        searchResults = null;
+        showSuggestions = false;
+        Navigation.NavigateTo($"/{result.MediaType ?? "movie"}/{result.Id}");
     }
 }
