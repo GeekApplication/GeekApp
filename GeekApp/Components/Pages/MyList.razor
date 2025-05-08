@@ -1,0 +1,367 @@
+﻿@page "/list/{ListId}"
+@using GeekApp.Shared.Lists
+@using GeekApp.Shared.ApiModels
+@using Microsoft.AspNetCore.Components.Authorization
+@inject IListService ListService
+@inject IContentService ContentService
+@inject NavigationManager Navigation
+@inject ILogger<ListItem> Logger
+@inject AuthenticationStateProvider AuthenticationStateProvider
+
+<div class="min-vh-100 bg-tepapa-green text-white">
+    <div class="container py-5">
+        <h1 class="display-4 fw-bold mb-4 orbitron">@(isWatchlist ? "Watchlist" : listData?.Name)</h1>
+
+        <!-- Filter Section -->
+        <div class="mb-4">
+            <div class="row g-3">
+                <div class="col-md-3">
+                    <label class="form-label filter-label">Search Titles</label>
+                    <input type="text" class="form-control search-input" placeholder="Search within list..." @bind="SearchQuery" @bind:event="oninput" />
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label filter-label">Media Type</label>
+                    <select class="form-select" @bind="MediaType" @bind:event="onchange">
+                        <option value="all">All</option>
+                        <option value="movie">Movies</option>
+                        <option value="tv">TV Shows</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label filter-label">Sort By</label>
+                    <select class="form-select" @bind="SortBy" @bind:event="onchange">
+                        <option value="popularity.desc">Popularity</option>
+                        <option value="vote_average.desc">Rating (High to Low)</option>
+                        <option value="title.asc">Title (A-Z)</option>
+                        <option value="release_date.desc">Release Year (Newest)</option>
+                        <option value="release_date.asc">Release Year (Oldest)</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label filter-label">Year</label>
+                    <div class="input-group year-filter-group">
+                        <input type="number" class="form-control year-input" placeholder="Year" @bind="selectedYear" min="1900" max="@DateTime.Now.Year" />
+                        <button class="btn btn-light-blue apply-year-btn" @onclick="ApplyFilters">Apply</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Results -->
+        @if (isLoading)
+        {
+            <div class="loading-container">
+                <div class="spinner-border text-light-blue" role="status"></div>
+                <span class="ms-3 fs-5 loading-text">Loading...</span>
+            </div>
+        }
+        else if (errorMessage != null)
+        {
+            <div class="alert alert-danger shadow-sm" role="alert">
+                <strong>Error:</strong> @errorMessage
+            </div>
+        }
+        else if (listData != null)
+        {
+            @if (filteredItems?.Any() != true)
+            {
+                <p class="text-gray-200 fs-5">No items match your filters.</p>
+            }
+            else
+            {
+                <div class="row row-cols-2 row-cols-sm-3 row-cols-md-4 row-cols-lg-5 g-4 results-grid">
+                    @foreach (var item in filteredItems)
+                    {
+                        var isInWatchlist = watchlistStatus.ContainsKey((item.MediaType, item.TmdbId)) && watchlistStatus[(item.MediaType, item.TmdbId)];
+                        <div class="col">
+                            <div class="result-card bg-gray-800 rounded-3 shadow-sm text-center text-decoration-none position-relative">
+                                <a href="/@item.MediaType/@item.TmdbId" class="d-block">
+                                    <img src="@item.PosterPath" alt="@(item.Title ?? item.Name ?? "Unknown")"
+                                         class="img-fluid rounded-top result-img"
+                                         onerror="this.src='/images/errorimage.jpg'" />
+                                </a>
+                                <button class="btn btn-md position-absolute top-0 end-0 m-2 @(isInWatchlist ? "btn-success" : "btn-warning") px-2.5 py-1.5 watchlist-btn"
+                                        title="@(isInWatchlist ? "Remove from Watchlist" : "Add to Watchlist")"
+                                        @onclick="() => ToggleWatchlist(item.MediaType, item.TmdbId)">
+                                    <span style="@(isInWatchlist ? "color: red !important;" : "")">@(isInWatchlist ? "➖" : "➕")</span>
+                                </button>
+                                <div class="result-body p-3">
+                                    <p class="result-title fw-medium text-white mb-1">@(item.Title ?? item.Name ?? "Unknown")</p>
+                                    <p class="result-meta text-sm text-gray-400 mb-1">
+                                        @(item.MediaType == "movie" ? "Movie" : "TV Show") - @(item.ReleaseDate ?? "N/A")
+                                    </p>
+                                    <p class="result-meta text-sm text-gray-400 mb-0">
+                                        Rating: @(item.VoteAverage.HasValue ? item.VoteAverage.Value.ToString("0.0") + "/10" : "N/A")
+                                    </p>
+                                    <p class="result-overview text-sm text-gray-400 mb-1">@item.Overview</p>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+        }
+    </div>
+</div>
+
+
+
+@code {
+    [Parameter]
+    public string ListId { get; set; }
+
+    private AddList listData;
+    private List<DisplayItem> displayItems;
+    private List<DisplayItem> filteredItems;
+    private bool isLoading = true;
+    private string errorMessage;
+    private bool isWatchlist;
+    private string searchQuery;
+    private string mediaType = "all";
+    private string sortBy = "popularity.desc";
+    private int? selectedYear;
+    private Dictionary<(string MediaType, int TmdbId), bool> watchlistStatus = new();
+
+    private class DisplayItem
+    {
+        public string MediaType { get; set; }
+        public int TmdbId { get; set; }
+        public string PosterPath { get; set; }
+        public string Title { get; set; }
+        public string Name { get; set; }
+        public string ReleaseDate { get; set; }
+        public string Overview { get; set; }
+        public double? VoteAverage { get; set; }
+        public double? Popularity { get; set; }
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        await LoadListData();
+    }
+
+    private async Task LoadListData()
+    {
+        try
+        {
+            isLoading = true;
+            errorMessage = null;
+            isWatchlist = ListId.ToLower() == "watchlist";
+
+            if (isWatchlist)
+            {
+                listData = await ListService.GetWatchlistAsync();
+                Logger.LogInformation("Loaded watchlist with {ItemCount} items", listData?.Items?.Count ?? 0);
+            }
+            else
+            {
+                var userLists = await ListService.GetUserListsAsync();
+                listData = userLists?.FirstOrDefault(l => l.Id == ListId);
+                if (listData == null)
+                {
+                    errorMessage = "List not found.";
+                    Logger.LogWarning("List not found for ID: {ListId}", ListId);
+                    return;
+                }
+                Logger.LogInformation("Loaded list {ListName} with {ItemCount} items", listData.Name, listData.Items?.Count ?? 0);
+            }
+
+            displayItems = await BuildDisplayItems(listData?.Items);
+            await InitializeWatchlist();
+            filteredItems = FilterAndSortItems(displayItems);
+        }
+        catch (UnauthorizedAccessException)
+        {
+            errorMessage = "Please log in to view this list.";
+            Navigation.NavigateTo("/login");
+        }
+        catch (Exception ex)
+        {
+            errorMessage = "An error occurred while loading the list.";
+            Logger.LogError(ex, "Failed to load list: {ListId}", ListId);
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private async Task<List<DisplayItem>> BuildDisplayItems(List<ListItem> items)
+    {
+        if (items == null || !items.Any())
+            return new List<DisplayItem>();
+
+        var result = new List<DisplayItem>();
+        var tasks = items.Select(async item =>
+        {
+            try
+            {
+                var tmdbResult = await ContentService.GetTitleSummaryAsync(item.MediaType, item.TmdbId);
+                if (tmdbResult != null)
+                {
+                    return new DisplayItem
+                        {
+                            MediaType = item.MediaType,
+                            TmdbId = item.TmdbId,
+                            PosterPath = tmdbResult.PosterPath,
+                            Title = tmdbResult.Title,
+                            Name = tmdbResult.Name,
+                            ReleaseDate = tmdbResult.ReleaseDate ?? tmdbResult.FirstAirDate,
+                            Overview = tmdbResult.Overview,
+                            VoteAverage = tmdbResult.VoteAverage,
+                            Popularity = tmdbResult.Popularity
+                        };
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger.LogWarning(ex, "Failed to fetch TMDB summary for {MediaType} {TmdbId}", item.MediaType, item.TmdbId);
+            }
+            return null;
+        });
+
+        var results = await Task.WhenAll(tasks);
+        result.AddRange(results.Where(r => r != null));
+
+        return result;
+    }
+
+    private async Task InitializeWatchlist()
+    {
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        if (authState.User.Identity?.IsAuthenticated == true)
+        {
+            try
+            {
+                var watchlist = await ListService.GetWatchlistAsync();
+                foreach (var item in watchlist.Items)
+                {
+                    watchlistStatus[(item.MediaType, item.TmdbId)] = true;
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger.LogWarning(ex, "Failed to initialize watchlist");
+            }
+        }
+    }
+
+    private async Task ToggleWatchlist(string mediaType, int tmdbId)
+    {
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        if (authState.User.Identity?.IsAuthenticated != true)
+        {
+            Navigation.NavigateTo("/login");
+            return;
+        }
+
+        var key = (mediaType, tmdbId);
+        var isInWatchlist = watchlistStatus.ContainsKey(key) && watchlistStatus[key];
+
+        try
+        {
+            Logger.LogDebug("{Action} watchlist: {MediaType}, TMDB ID: {TmdbId}", isInWatchlist ? "Removing from" : "Adding to", mediaType, tmdbId);
+            if (isInWatchlist)
+            {
+                await ListService.RemoveFromWatchlistAsync(mediaType, tmdbId);
+                watchlistStatus[key] = false;
+                Logger.LogInformation("Removed from watchlist: {MediaType}, TMDB ID: {TmdbId}", mediaType, tmdbId);
+            }
+            else
+            {
+                await ListService.AddToWatchlistAsync(mediaType, tmdbId);
+                watchlistStatus[key] = true;
+                Logger.LogInformation("Added to watchlist: {MediaType}, TMDB ID: {TmdbId}", mediaType, tmdbId);
+            }
+        }
+        catch (UnauthorizedAccessException)
+        {
+            Logger.LogWarning("Unauthorized access when toggling watchlist.");
+            Navigation.NavigateTo("/login");
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Failed to toggle watchlist: {MediaType}, TMDB ID: {TmdbId}", mediaType, tmdbId);
+        }
+        StateHasChanged();
+    }
+
+    private void ApplyFilters()
+    {
+        filteredItems = FilterAndSortItems(displayItems);
+        StateHasChanged();
+    }
+
+    private List<DisplayItem> FilterAndSortItems(List<DisplayItem> items)
+    {
+        if (items == null)
+            return new List<DisplayItem>();
+
+        var filtered = items.AsEnumerable();
+
+        // Search filter
+        if (!string.IsNullOrWhiteSpace(searchQuery))
+        {
+            var query = searchQuery.ToLower();
+            filtered = filtered.Where(i => (i.Title ?? i.Name ?? "").ToLower().Contains(query));
+        }
+
+        // Media type filter
+        if (mediaType != "all")
+        {
+            filtered = filtered.Where(i => i.MediaType == mediaType);
+        }
+
+        // Year filter
+        if (selectedYear.HasValue)
+        {
+            filtered = filtered.Where(i =>
+                DateTime.TryParse(i.ReleaseDate, out var date) && date.Year == selectedYear.Value);
+        }
+
+        // Sorting
+        filtered = sortBy switch
+        {
+            "popularity.desc" => filtered.OrderByDescending(i => i.Popularity ?? 0),
+            "vote_average.desc" => filtered.OrderByDescending(i => i.VoteAverage ?? 0),
+            "title.asc" => filtered.OrderBy(i => (i.Title ?? i.Name ?? "").ToLower()),
+            "release_date.desc" => filtered.OrderByDescending(i =>
+                DateTime.TryParse(i.ReleaseDate, out var date) ? date : DateTime.MinValue),
+            "release_date.asc" => filtered.OrderBy(i =>
+                DateTime.TryParse(i.ReleaseDate, out var date) ? date : DateTime.MaxValue),
+            _ => filtered
+        };
+
+        return filtered.ToList();
+    }
+
+    private string SearchQuery
+    {
+        get => searchQuery;
+        set
+        {
+            searchQuery = value;
+            ApplyFilters();
+        }
+    }
+
+    private string MediaType
+    {
+        get => mediaType;
+        set
+        {
+            mediaType = value;
+            ApplyFilters();
+        }
+    }
+
+    private string SortBy
+    {
+        get => sortBy;
+        set
+        {
+            sortBy = value;
+            ApplyFilters();
+        }
+    }
+}

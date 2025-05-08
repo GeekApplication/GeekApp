@@ -1,0 +1,171 @@
+﻿/* ========== BASE STYLES ========== */
+.bg-tepapa-green {
+    background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+    background-attachment: fixed;
+    padding-bottom: 2rem;
+}
+
+/* ========== TYPOGRAPHY ========== */
+.orbitron {
+    font-family: 'Orbitron', sans-serif;
+    letter-spacing: 1px;
+}
+
+h1.orbitron {
+    font-size: 2.2rem;
+    background: linear-gradient(90deg, #00ffff, #00ffaa);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    margin-bottom: 1.5rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid rgba(0, 255, 255, 0.3);
+}
+
+h2.orbitron {
+    font-size: 1.8rem;
+    color: #00ffff;
+    margin: 1.5rem 0 1rem 0;
+    position: relative;
+}
+
+/* ========== FILTER SECTION ========== */
+.filter-section {
+    margin-bottom: 2rem;
+}
+
+.filter-row {
+    align-items: flex-start;
+}
+
+.filter-group {
+    margin-bottom: 1.5rem;
+}
+
+.filter-label {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 0.95rem;
+}
+
+.genre-container {
+    margin-top: 0.5rem;
+}
+
+.genre-checkboxes {
+    background-color: rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(0, 255, 255, 0.2);
+    border-radius: 0.25rem;
+    padding: 0.75rem;
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.form-check {
+    margin-bottom: 0.5rem;
+}
+
+/* ========== FORM CONTROLS ========== */
+.form-select, .form-control {
+    background-color: rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(0, 255, 255, 0.3);
+    color: white;
+    transition: all 0.3s ease;
+    width: 100%;
+}
+
+.form-control {
+    padding: 0.5rem 0.75rem;
+}
+
+.year-input-group {
+    gap: 0.5rem;
+}
+
+    .year-input-group .form-control {
+        flex: 1;
+    }
+
+/* ========== BUTTONS ========== */
+.btn-light-blue {
+    background-color: rgba(0, 255, 255, 0.1);
+    border: 1px solid #00ffff;
+    color: #00ffff;
+    transition: all 0.3s ease;
+    padding: 0.5rem 1rem;
+    white-space: nowrap;
+}
+
+    .btn-light-blue:hover {
+        background-color: rgba(0, 255, 255, 0.2);
+        color: white;
+        box-shadow: 0 0 15px rgba(0, 255, 255, 0.4);
+    }
+
+.refresh-btn {
+    margin-top: 0.5rem;
+}
+
+/* ========== RESULTS GRID ========== */
+.results-grid {
+    margin-top: 1.5rem;
+}
+
+.result-card {
+    transition: all 0.3s ease;
+    border: 1px solid rgba(0, 255, 255, 0.1);
+    overflow: hidden;
+    height: 100%;
+}
+
+    .result-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+        border-color: rgba(0, 255, 255, 0.3);
+    }
+
+.result-img {
+    transition: all 0.5s ease;
+    height: 300px;
+    width: 100%;
+    object-fit: cover;
+}
+
+.result-body {
+    padding: 1rem;
+}
+
+.result-title {
+    font-weight: 500;
+    margin-bottom: 0.25rem;
+    color: white;
+}
+
+.result-meta {
+    font-size: 0.85rem;
+    color: rgba(255, 255, 255, 0.7);
+}
+
+/* ========== LOADING STATES ========== */
+.loading-container {
+    margin: 2rem 0;
+    text-align: center;
+}
+
+.spinner-border.text-light-blue {
+    color: #00ffff;
+    width: 3rem;
+    height: 3rem;
+}
+
+.loading-text {
+    margin-top: 1rem;
+    font-size: 1.1rem;
+}
+
+/* ========== LOAD MORE BUTTON ========== */
+.load-more-container {
+    margin-top: 2rem;
+    text-align: center;
+}

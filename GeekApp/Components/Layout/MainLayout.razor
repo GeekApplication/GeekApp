@@ -1,21 +1,81 @@
 ﻿@inherits LayoutComponentBase
 @inject NavigationManager NavManager
 @inject IAuthService AuthService
+@inject IHttpClientFactory HttpClientFactory
+@inject AuthenticationStateProvider AuthStateProvider
 @using Microsoft.AspNetCore.Components.Authorization
 
 <PageTitle>GeekApp</PageTitle>
 
 <div class="main-layout">
-    <Navbar />
-    
+    <CascadingAuthenticationState>
+        <Navbar />
+    </CascadingAuthenticationState>
+
     <div class="main-content">
         @Body
     </div>
 </div>
 
 @code {
+    private bool _ready = false;
+    private string _result;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            _logger.LogDebug("Checking authentication state in MainLayout.");
+            var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+            var userId = authState.User.FindFirst("nameid")?.Value;
+            if (string.IsNullOrEmpty(userId))
+            {
+                _logger.LogDebug("No authenticated user found in MainLayout.");
+                NavManager.NavigateTo("/login");
+                return;
+            }
+
+            _logger.LogDebug("Authenticated user found with UserId: {UserId}.", userId);
+            var http = HttpClientFactory.CreateClient("AuthorizedAPI");
+            try
+            {
+                _logger.LogDebug("Fetching lists from API.");
+                _result = await http.GetStringAsync("api/lists/all");
+                _ready = true;
+                _logger.LogInformation("Lists fetched successfully in MainLayout.");
+                StateHasChanged();
+            }
+            catch (HttpRequestException ex) when (ex.StatusCode == System.Net.HttpStatusCode.Unauthorized)
+            {
+                _logger.LogWarning("Unauthorized access when fetching lists. User is authenticated, skipping redirect.");
+                // Do not redirect to login if user is authenticated
+                _ready = true;
+                StateHasChanged();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to fetch lists in MainLayout.");
+                _ready = true;
+                StateHasChanged();
+            }
+        }
+    }
+
     private async Task Logout()
     {
-        await AuthService.LogoutAsync();
+        try
+        {
+            _logger.LogDebug("Initiating logout in MainLayout.");
+            await AuthService.LogoutAsync();
+            _logger.LogInformation("Logout successful in MainLayout.");
+            NavManager.NavigateTo("/login");
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Logout failed in MainLayout.");
+        }
     }
+
+    [Inject]
+    private ILogger<MainLayout> _logger { get; set; }
 }

@@ -1,21 +1,31 @@
 ﻿using GeekApp.Server.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.Caching.Memory;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using Polly;
 using Polly.Extensions.Http;
 using System.Net;
 using System.Net.Http.Headers;
 using System.Text;
+using Microsoft.OpenApi.Models;
+using Microsoft.Extensions.Logging;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Configure Mongo and AuthService
+// Add logging for diagnostics
+builder.Services.AddLogging(logging =>
+{
+    logging.AddConsole();
+    logging.AddDebug();
+    logging.SetMinimumLevel(LogLevel.Debug);
+});
+
+// Configure Mongo and Services
 builder.Services.AddSingleton<MongoDBService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<IListService, ListService>();
 builder.Services.AddMemoryCache();
-builder.Services.AddLogging();
+builder.Services.AddHttpContextAccessor();
 
 // Register TMDB services with Polly policies
 builder.Services.AddHttpClient("TmdbService", client =>
@@ -36,8 +46,6 @@ builder.Services.AddScoped<ITmdbService>(provider =>
         provider.GetRequiredService<IMemoryCache>(),
         provider.GetRequiredService<ILogger<CachedTmdbService>>()));
 
-builder.Services.AddSingleton<IGenreService, GenreService>();
-
 // Add Authentication & Authorization
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
@@ -53,13 +61,53 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             IssuerSigningKey = new SymmetricSecurityKey(
                 Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]))
         };
+        options.Events = new JwtBearerEvents
+        {
+            OnTokenValidated = context =>
+            {
+                var logger = context.HttpContext.RequestServices.GetRequiredService<ILogger<Program>>();
+                logger.LogDebug("JWT token validated for user: {UserId}", context.Principal?.FindFirst("nameid")?.Value);
+                return Task.CompletedTask;
+            },
+            OnAuthenticationFailed = context =>
+            {
+                var logger = context.HttpContext.RequestServices.GetRequiredService<ILogger<Program>>();
+                logger.LogError("JWT authentication failed: {Error}", context.Exception.Message);
+                return Task.CompletedTask;
+            }
+        };
     });
 
 builder.Services.AddAuthorization();
 
-// Swagger
+// Swagger with JWT Authentication
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(c =>
+{
+    c.SwaggerDoc("v1", new OpenApiInfo { Title = "GeekApp API", Version = "v1" });
+    c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    {
+        Description = "JWT Authorization header using the Bearer scheme. Example: \"Authorization: Bearer {token}\"",
+        Name = "Authorization",
+        In = ParameterLocation.Header,
+        Type = SecuritySchemeType.ApiKey,
+        Scheme = "Bearer"
+    });
+    c.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        {
+            new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiReference
+                {
+                    Type = ReferenceType.SecurityScheme,
+                    Id = "Bearer"
+                }
+            },
+            new string[] {}
+        }
+    });
+});
 
 builder.Services.AddControllers();
 
@@ -75,20 +123,36 @@ builder.Services.AddCors(options =>
 
 var app = builder.Build();
 
+// Configure middleware
+app.Use(async (context, next) =>
+{
+    var logger = context.RequestServices.GetRequiredService<ILogger<Program>>();
+    logger.LogDebug("Processing request: {Path}", context.Request.Path);
+    await next(context);
+});
+
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
-    app.UseSwaggerUI();
+    app.UseSwaggerUI(c =>
+    {
+        c.SwaggerEndpoint("/swagger/v1/swagger.json", "GeekApp API v1");
+        c.RoutePrefix = string.Empty;
+        c.InjectStylesheet("/swagger-ui/custom.css");
+        c.DocumentTitle = "GeekApp API";
+    });
 }
 
 app.UseHttpsRedirection();
-app.UseMiddleware<ExceptionHandlingMiddleware>();
 app.UseCors("AllowBlazorFrontend");
-
 app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+
+// Add health check endpoint
+app.MapGet("/health", () => Results.Ok(new { Status = "Healthy" }));
+
 app.Run();
 
 static IAsyncPolicy<HttpResponseMessage> GetRetryPolicy()

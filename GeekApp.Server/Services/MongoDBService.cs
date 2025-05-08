@@ -1,4 +1,5 @@
 ﻿using GeekApp.Server.Models;
+using GeekApp.Shared.Lists;
 using MongoDB.Driver;
 
 namespace GeekApp.Server.Services
@@ -14,5 +15,7 @@ namespace GeekApp.Server.Services
         }
 
         public IMongoCollection<ApiUser> Users => _database.GetCollection<ApiUser>("Users");
+        public IMongoCollection<AddList> Lists => _database.GetCollection<AddList>("Lists");
+        public IMongoCollection<ListItem> ListItems => _database.GetCollection<ListItem>("ListItems");
     }
 }

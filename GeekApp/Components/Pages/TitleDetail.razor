@@ -1,7 +1,13 @@
-﻿@page "/title/{MediaType}/{Id:int}"
+﻿@page "/{MediaType}/{Id:int}"
 @using GeekApp.Shared.ApiModels
+@using GeekApp.Shared.Lists
+@using Microsoft.AspNetCore.Components.Authorization
 @inject HttpClient Http
 @inject NavigationManager Navigation
+@inject IJSRuntime JSRuntime
+@inject IListService ListService
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject ILogger<TitleDetail> Logger
 
 @if (isLoading)
 {
@@ -23,39 +29,178 @@ else if (titleData != null)
     <div class="min-vh-100 bg-tepapa-green text-white">
         <!-- Hero Section with Backdrop -->
         <div class="position-relative hero-section">
-            <img src="@titleData.Details.BackdropPath" alt="Backdrop" class="position-absolute w-100 h-100 object-fit-cover opacity-25" />
+            <img src="@titleData.Details.BackdropPath" alt="Backdrop" class="position-absolute w-100 h-100 object-fit-cover opacity-30" />
             <div class="container py-5 py-md-6 position-relative">
                 <div class="row g-4 align-items-center">
                     <div class="col-md-4">
-                        <img src="@titleData.Details.PosterPath" alt="Poster" class="img-fluid rounded-3 shadow-lg poster-img" />
+                        <div class="position-relative poster-container">
+                            <img src="@titleData.Details.PosterPath" alt="Poster" class="img-fluid rounded-3 shadow-lg poster-img" />
+                            <button class="btn btn-sm watchlist-btn @(isInWatchlist ? "btn-success" : "btn-warning")"
+                                    title="@(isInWatchlist ? "Remove from Watchlist" : "Add to Watchlist")"
+                                    @onclick="ToggleWatchlist">
+                                <span style="@(isInWatchlist ? "color: red !important;" : "")">@(isInWatchlist ? "➖" : "➕")</span>
+                            </button>
+                        </div>
                     </div>
                     <div class="col-md-8">
                         <h1 class="display-4 fw-bold mb-3 orbitron">@(titleData.Details.Title ?? titleData.Details.Name)</h1>
-                        <p class="lead text-gray-200 mb-4">@titleData.Details.Overview</p>
+                        @if (!string.IsNullOrEmpty(titleData.Details.Tagline))
+                        {
+                            <p class="lead text-gray-200 mb-3 fst-italic">"@titleData.Details.Tagline"</p>
+                        }
+                        <div class="mb-4">
+                            <button class="btn btn-md btn-primary px-3 py-2" data-bs-toggle="dropdown" aria-expanded="false">
+                                Add to List
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end bg-gray-800 text-white shadow-lg">
+                                <li>
+                                    <a class="dropdown-item d-flex justify-content-between align-items-center" href="/profile">
+                                        View Watchlist
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" class="bi bi-chevron-right" viewBox="0 0 16 16" fill="currentColor"><path fill-rule="evenodd" d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708z" /></svg>
+                                    </a>
+                                </li>
+                                <li><hr class="dropdown-divider bg-gray-600" /></li>
+                                <li>
+                                    <a class="dropdown-item d-flex justify-content-between align-items-center" href="/profile">
+                                        Create New List
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" class="bi bi-chevron-right" viewBox="0 0 16 16" fill="currentColor"><path fill-rule="evenodd" d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708z" /></svg>
+                                    </a>
+                                </li>
+                                <li><hr class="dropdown-divider bg-gray-600" /></li>
+                                @foreach (var list in userLists)
+                                {
+                                    var isInList = listsContainingTitle.Contains(list.Id);
+                                    <li class="d-flex align-items-center">
+                                        <button class="dropdown-item flex-grow-1 @(isInList ? "text-success" : "")" @onclick="() => ToggleList(list.Id)">
+                                            @list.Name @(isInList ? "✓" : "")
+                                        </button>
+                                        <a class="dropdown-item px-2" href="/profile" aria-label="Go to list: @list.Name">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" class="bi bi-chevron-right" viewBox="0 0 16 16" fill="currentColor"><path fill-rule="evenodd" d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708z" /></svg>
+                                        </a>
+                                    </li>
+                                }
+                            </ul>
+                        </div>
+                        <p class="text-gray-200 mb-4">@titleData.Details.Overview</p>
                         <div class="row g-3">
                             <div class="col-sm-6">
-                                <p><strong>Genres:</strong> @string.Join(", ", titleData.Details.Genres.Select(g => g.Name))</p>
+                                <p><strong>Genres:</strong> @string.Join(", ", titleData.Details.Genres?.Select(g => g.Name) ?? new List<string>())</p>
                             </div>
                             <div class="col-sm-6">
-                                <p><strong>Release Date:</strong> @(titleData.Details.ReleaseDate ?? titleData.Details.FirstAirDate)</p>
+                                <p><strong>@(MediaType.ToLower() == "movie" ? "Release Date" : "First Air Date"):</strong> @(titleData.Details.ReleaseDate ?? titleData.Details.FirstAirDate ?? "N/A")</p>
                             </div>
                             <div class="col-sm-6">
-                                <p><strong>Rating:</strong> @titleData.Details.VoteAverage.ToString("0.0")/10</p>
+                                <p><strong>Rating:</strong> @titleData.Details.VoteAverage.ToString("0.0")/10 (@titleData.Details.VoteCount votes)</p>
                             </div>
                             <div class="col-sm-6">
-                                <p><strong>Runtime:</strong> @titleData.Details.Runtime minutes</p>
+                                @if (MediaType.ToLower() == "movie" && titleData.Details.Runtime.HasValue)
+                                {
+                                    <p><strong>Runtime:</strong> @titleData.Details.Runtime.Value minutes</p>
+                                }
+                                else if (MediaType.ToLower() == "tv" && titleData.Details.EpisodeRunTime?.Any() == true)
+                                {
+                                    <p><strong>Episode Runtime:</strong> @string.Join(", ", titleData.Details.EpisodeRunTime.Select(t => $"{t} min"))</p>
+                                }
                             </div>
+                            @if (MediaType.ToLower() == "movie")
+                            {
+                                <div class="col-sm-6">
+                                    <p><strong>Budget:</strong> @(titleData.Details.Budget.HasValue ? $"${titleData.Details.Budget.Value:N0}" : "N/A")</p>
+                                </div>
+                                <div class="col-sm-6">
+                                    <p><strong>Revenue:</strong> @(titleData.Details.Revenue.HasValue ? $"${titleData.Details.Revenue.Value:N0}" : "N/A")</p>
+                                </div>
+                            }
+                            <div class="col-sm-6">
+                                <p><strong>Status:</strong> @titleData.Details.Status</p>
+                            </div>
+                            @if (MediaType.ToLower() == "tv" && titleData.Details.NumberOfSeasons.HasValue)
+                            {
+                                <div class="col-sm-6">
+                                    <p><strong>Seasons:</strong> @titleData.Details.NumberOfSeasons.Value</p>
+                                </div>
+                                <div class="col-sm-6">
+                                    <p><strong>Episodes:</strong> @(titleData.Details.NumberOfEpisodes.HasValue ? titleData.Details.NumberOfEpisodes.Value.ToString() : "N/A")</p>
+                                </div>
+                            }
                         </div>
                     </div>
                 </div>
             </div>
         </div>
 
+        <!-- Production Companies -->
+        @if (titleData.Details.ProductionCompanies?.Any() == true)
+        {
+            <div class="container py-5 bg-gray-900">
+                <h2 class="h3 fw-bold mb-4 orbitron">Production Companies</h2>
+                <div class="row row-cols-2 row-cols-sm-3 row-cols-md-4 g-4">
+                    @foreach (var company in titleData.Details.ProductionCompanies)
+                    {
+                        <div class="col">
+                            <div class="company-card bg-gray-800 rounded-3 shadow-sm p-3 text-center">
+                                @if (!string.IsNullOrEmpty(company.LogoPath))
+                                {
+                                    <img src="@company.LogoPath" alt="@company.Name" class="img-fluid mb-2 company-logo" />
+                                }
+                                <p class="fw-medium text-white mb-0">@company.Name</p>
+                                <p class="text-sm text-gray-400">@company.OriginCountry</p>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        }
+
+        <!-- Videos -->
+        @if (titleData.Details.Videos?.Results?.Any(v => v.Site == "YouTube" && v.Type == "Trailer") == true)
+        {
+            <div class="container py-5">
+                <h2 class="h3 fw-bold mb-4 orbitron">Trailers</h2>
+                <div class="row g-4">
+                    @foreach (var video in titleData.Details.Videos.Results.Where(v => v.Site == "YouTube" && v.Type == "Trailer").Take(3))
+                    {
+                        <div class="col-md-6 col-lg-4">
+                            <div class="video-card bg-gray-800 rounded-3 shadow-sm">
+                                <iframe class="w-100 rounded-top" height="200" src="https://www.youtube.com/embed/@video.Key" title="@video.Name" frameborder="0" allowfullscreen></iframe>
+                                <div class="p-3">
+                                    <p class="fw-medium text-white mb-0">@video.Name</p>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        }
+
+        <!-- Seasons (TV Only) -->
+        @if (MediaType.ToLower() == "tv" && titleData.Details.Seasons?.Any() == true)
+        {
+            <div class="container py-5 bg-gray-900">
+                <h2 class="h3 fw-bold mb-4 orbitron">Seasons</h2>
+                <div class="row row-cols-2 row-cols-sm-3 row-cols-md-4 g-4">
+                    @foreach (var season in titleData.Details.Seasons)
+                    {
+                        <div class="col">
+                            <div class="season-card bg-gray-800 rounded-3 shadow-sm text-center cursor-pointer" @onclick="() => ShowSeasonModal(season)">
+                                <img src="@season.PosterPath" alt="@season.Name" class="img-fluid rounded-top season-img" />
+                                <div class="p-3">
+                                    <p class="fw-medium text-white mb-1">@season.Name</p>
+                                    <p class="text-sm text-gray-400">@season.EpisodeCount episodes</p>
+                                    <p class="text-sm text-gray-400">@season.AirDate</p>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        }
+
         <!-- Cast Section -->
         <div class="container py-5">
             <h2 class="h3 fw-bold mb-4 orbitron">Cast</h2>
             <div class="row row-cols-2 row-cols-sm-3 row-cols-md-4 row-cols-lg-5 g-4">
-                @foreach (var cast in titleData.Credits.Cast.Take(10))
+                @foreach (var cast in titleData.Credits.Cast?.Take(15) ?? new List<TmdbCast>())
                 {
                     <div class="col">
                         <div class="cast-card bg-gray-800 rounded-3 shadow-sm text-center">
@@ -74,7 +219,7 @@ else if (titleData != null)
         <div class="container py-5 bg-gray-900">
             <h2 class="h3 fw-bold mb-4 orbitron">Crew</h2>
             <div class="row row-cols-2 row-cols-sm-3 row-cols-md-4 row-cols-lg-5 g-4">
-                @foreach (var crew in titleData.Credits.Crew.Take(10))
+                @foreach (var crew in titleData.Credits.Crew?.Take(15) ?? new List<TmdbCrew>())
                 {
                     <div class="col">
                         <div class="crew-card bg-gray-800 rounded-3 shadow-sm p-3">
@@ -90,10 +235,10 @@ else if (titleData != null)
         <div class="container py-5">
             <h2 class="h3 fw-bold mb-4 orbitron">Similar Titles</h2>
             <div class="row row-cols-2 row-cols-sm-3 row-cols-md-4 row-cols-lg-5 g-4">
-                @foreach (var similar in titleData.Similar.Results.Take(10))
+                @foreach (var similar in titleData.Similar?.Results?.Take(15) ?? new List<TmdbResult>())
                 {
                     <div class="col">
-                        <a href="/title/@MediaType/@similar.Id" class="similar-card bg-gray-800 rounded-3 shadow-sm text-center text-decoration-none">
+                        <a href="/@MediaType/@similar.Id" class="similar-card bg-gray-800 rounded-3 shadow-sm text-center text-decoration-none">
                             <img src="@similar.PosterPath" alt="@(similar.Title ?? similar.Name)" class="img-fluid rounded-top similar-img" />
                             <div class="p-3">
                                 <p class="fw-medium text-white mb-0">@(similar.Title ?? similar.Name)</p>
@@ -103,8 +248,105 @@ else if (titleData != null)
                 }
             </div>
         </div>
+
+        <!-- Season Modal -->
+        @if (selectedSeason != null)
+        {
+            <div class="modal fade show d-block" tabindex="-1" role="dialog" style="background-color: rgba(0,0,0,0.5);">
+                <div class="modal-dialog modal-lg">
+                    <div class="modal-content bg-gray-900 text-white">
+                        <div class="modal-header">
+                            <h5 class="modal-title orbitron">@selectedSeason.Name</h5>
+                            <button type="button" class="btn-close btn-close-white" @onclick="CloseSeasonModal"></button>
+                        </div>
+                        <div class="modal-body">
+                            <p>@selectedSeason.Overview</p>
+                            <h6 class="fw-bold mb-3 orbitron">Episodes</h6>
+                            <div class="row g-4">
+                                @foreach (var episode in selectedSeason.Episodes ?? new List<TmdbEpisode>())
+                                {
+                                    <div class="col-md-6">
+                                        <a href="/tv/@Id/season/@selectedSeason.SeasonNumber/episode/@episode.EpisodeNumber" class="episode-card bg-gray-800 rounded-3 shadow-sm text-decoration-none">
+                                            <div class="row g-0">
+                                                <div class="col-4">
+                                                    <img src="@episode.StillPath" alt="@episode.Name" class="img-fluid rounded-start episode-img" />
+                                                </div>
+                                                <div class="col-8 p-3">
+                                                    <p class="fw-medium text-white mb-1">Episode @episode.EpisodeNumber: @episode.Name</p>
+                                                    <p class="text-sm text-gray-400 mb-1">@episode.AirDate</p>
+                                                    <p class="text-sm text-gray-400 text-truncate">@episode.Overview</p>
+                                                </div>
+                                            </div>
+                                        </a>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
     </div>
 }
+
+<style>
+    .poster-container {
+        position: relative;
+        display: inline-block;
+    }
+
+    .poster-img {
+        transition: none;
+        width: 100%;
+        height: auto;
+    }
+
+        .poster-img:hover {
+            transform: none;
+            box-shadow: none;
+        }
+
+    .watchlist-btn {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        padding: 8px 12px;
+        transition: background-color 0.2s, transform 0.2s;
+        z-index: 10;
+    }
+
+        .watchlist-btn:hover {
+            transform: scale(1.1);
+            background-color: @(isInWatchlist ? "#2ca52c" : "#e6b800");
+        }
+
+    .dropdown-menu {
+        min-width: 200px;
+        background-color: #1a1a1a !important;
+        border: 1px solid #444;
+        padding: 10px;
+    }
+
+    .dropdown-item {
+        color: #fff !important;
+        font-size: 1rem;
+        padding: 8px 12px;
+        border-radius: 4px;
+    }
+
+        .dropdown-item:hover {
+            background-color: #333 !important;
+            color: #fff !important;
+        }
+
+    .dropdown-divider {
+        border-top: 1px solid #555;
+    }
+
+    .text-success {
+        color: #28a745 !important;
+    }
+</style>
 
 @code {
     [Parameter]
@@ -116,10 +358,15 @@ else if (titleData != null)
     private TmdbRoot titleData;
     private bool isLoading = true;
     private string errorMessage;
+    private TmdbSeason selectedSeason;
+    private bool isInWatchlist;
+    private List<AddList> userLists = new();
+    private List<string> listsContainingTitle = new();
 
     protected override async Task OnParametersSetAsync()
     {
         await LoadTitleData();
+        await InitializeWatchlistAndLists();
     }
 
     private async Task LoadTitleData()
@@ -128,6 +375,7 @@ else if (titleData != null)
         {
             isLoading = true;
             errorMessage = null;
+            selectedSeason = null;
 
             var response = await Http.GetAsync($"https://localhost:7282/api/tmdb/title/{MediaType}/{Id}");
             if (response.IsSuccessStatusCode)
@@ -147,5 +395,160 @@ else if (titleData != null)
         {
             isLoading = false;
         }
+    }
+
+    private async Task InitializeWatchlistAndLists()
+    {
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        if (authState.User.Identity?.IsAuthenticated == true)
+        {
+            try
+            {
+                var userListsTask = ListService.GetUserListsAsync();
+                var listsWithTitleTask = ListService.GetListsContainingTitleAsync(MediaType, Id);
+
+                await Task.WhenAll(userListsTask, listsWithTitleTask);
+
+                userLists = userListsTask.Result ?? new List<AddList>();
+                var listsWithTitle = listsWithTitleTask.Result ?? new List<AddList>();
+                listsContainingTitle = listsWithTitle.Select(l => l.Id).ToList();
+                isInWatchlist = listsWithTitle.Any(l => l.Name.ToLower() == "watchlist");
+
+                Logger.LogInformation("Initialized watchlist: {IsInWatchlist}, user lists: {UserListCount}, lists containing title: {ListCount}",
+                    isInWatchlist, userLists.Count, listsContainingTitle.Count);
+            }
+            catch (Exception ex)
+            {
+                Logger.LogWarning(ex, "Failed to initialize watchlist or lists");
+                isInWatchlist = false;
+                userLists = new List<AddList>();
+                listsContainingTitle = new List<string>();
+            }
+        }
+        else
+        {
+            isInWatchlist = false;
+            userLists = new List<AddList>();
+            listsContainingTitle = new List<string>();
+        }
+        StateHasChanged();
+    }
+
+    private async Task ToggleWatchlist()
+    {
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        if (authState.User.Identity?.IsAuthenticated != true)
+        {
+            Navigation.NavigateTo("/login");
+            return;
+        }
+
+        try
+        {
+            bool success;
+            if (isInWatchlist)
+            {
+                success = await ListService.RemoveFromWatchlistAsync(MediaType, Id);
+                if (success)
+                {
+                    isInWatchlist = false;
+                    Logger.LogInformation("Removed from watchlist: {MediaType}, TMDB ID: {TmdbId}", MediaType, Id);
+                }
+                else
+                {
+                    Logger.LogWarning("Failed to remove from watchlist: {MediaType}, TMDB ID: {TmdbId}", MediaType, Id);
+                }
+            }
+            else
+            {
+                success = await ListService.AddToWatchlistAsync(MediaType, Id);
+                if (success)
+                {
+                    isInWatchlist = true;
+                    Logger.LogInformation("Added to watchlist: {MediaType}, TMDB ID: {TmdbId}", MediaType, Id);
+                }
+                else
+                {
+                    Logger.LogWarning("Failed to add to watchlist: {MediaType}, TMDB ID: {TmdbId}", MediaType, Id);
+                }
+            }
+            if (success)
+            {
+                await InitializeWatchlistAndLists();
+            }
+            StateHasChanged();
+        }
+        catch (UnauthorizedAccessException)
+        {
+            Logger.LogWarning("Unauthorized access when toggling watchlist.");
+            Navigation.NavigateTo("/login");
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Failed to toggle watchlist: {MediaType}, TMDB ID: {TmdbId}", MediaType, Id);
+        }
+        StateHasChanged();
+    }
+
+    private async Task ToggleList(string listId)
+    {
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        if (authState.User.Identity?.IsAuthenticated != true)
+        {
+            Navigation.NavigateTo("/login");
+            return;
+        }
+
+        try
+        {
+            if (listsContainingTitle.Contains(listId))
+            {
+                var success = await ListService.RemoveFromListAsync(listId, MediaType, Id);
+                if (success)
+                {
+                    listsContainingTitle.Remove(listId);
+                    Logger.LogInformation("Removed from list {ListId}: {MediaType}, TMDB ID: {TmdbId}", listId, MediaType, Id);
+                }
+                else
+                {
+                    Logger.LogWarning("Failed to remove from list {ListId}: {MediaType}, TMDB ID: {TmdbId}", listId, MediaType, Id);
+                }
+            }
+            else
+            {
+                var success = await ListService.AddToListAsync(listId, MediaType, Id);
+                if (success)
+                {
+                    listsContainingTitle.Add(listId);
+                    Logger.LogInformation("Added to list {ListId}: {MediaType}, TMDB ID: {TmdbId}", listId, MediaType, Id);
+                }
+                else
+                {
+                    Logger.LogWarning("Failed to add to list {ListId}: {MediaType}, TMDB ID: {TmdbId}", listId, MediaType, Id);
+                }
+            }
+            StateHasChanged();
+            await InitializeWatchlistAndLists();
+        }
+        catch (UnauthorizedAccessException)
+        {
+            Logger.LogWarning("Unauthorized access when toggling list.");
+            Navigation.NavigateTo("/login");
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Failed to toggle list {ListId}: {MediaType}, TMDB ID: {TmdbId}", listId, MediaType, Id);
+        }
+        StateHasChanged();
+    }
+
+    private void ShowSeasonModal(TmdbSeason season)
+    {
+        selectedSeason = season;
+    }
+
+    private void CloseSeasonModal()
+    {
+        selectedSeason = null;
     }
 }

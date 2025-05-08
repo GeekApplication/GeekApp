@@ -3,16 +3,21 @@
 @using System.Security.Claims
 @using Microsoft.AspNetCore.Authorization
 @using Microsoft.AspNetCore.Components.Authorization
+@using GeekApp.Services
+@using GeekApp.Shared.Lists
 @inject AuthenticationStateProvider AuthStateProvider
+@inject IListService ListService
+@inject NavigationManager NavigationManager
 
-<div class="profile-background">
-    <div class="profile-card animate-pop">
-        <div class="profile-header">
-            <h2>👤 Your Profile</h2>
+<div class="profile-background min-h-screen flex flex-col items-center py-8">
+    <!-- Profile Details Container -->
+    <div class="profile-card p-6 w-full max-w-md mb-8 animate-pop">
+        <div class="profile-header text-center">
+            <h2 class="text-2xl font-bold">👤 Your Profile</h2>
         </div>
-        @if (user != null)
+        @if (user != null && user.Identity != null && user.Identity.IsAuthenticated)
         {
-            <div class="profile-details">
+            <div class="profile-details mt-4 space-y-2">
                 <p><strong>Name:</strong> @name</p>
                 <p><strong>User ID:</strong> @userId</p>
                 <p><strong>Email:</strong> @email</p>
@@ -21,9 +26,155 @@
         }
         else
         {
-            <p>Loading profile...</p>
+            <p class="text-center">Loading profile...</p>
         }
     </div>
+
+    <!-- Lists Container -->
+    <div class="lists-card p-6 w-full max-w-2xl animate-pop">
+        <div class="lists-header flex justify-between items-center mb-4">
+            <h2 class="text-xl font-semibold">📋 Your Lists</h2>
+            <div class="create-list-form flex items-center space-x-2">
+                <input type="text" @bind="newListName" placeholder="New list name" class="border rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500" />
+                <button @onclick="CreateList" class="px-4 py-2 rounded transition">Create</button>
+            </div>
+        </div>
+        @if (!string.IsNullOrEmpty(errorMessage))
+        {
+            <p class="text-red-500 mb-4">@errorMessage</p>
+        }
+        @if (lists == null)
+        {
+            <p class="text-center">Loading lists...</p>
+        }
+        else if (lists.Count == 0)
+        {
+            <p class="text-center">No lists found. Create one above!</p>
+        }
+        else
+        {
+            <!-- Watchlist Section -->
+            <div class="watchlist-section mb-6">
+                <h3 class="text-lg font-medium mb-2">Watchlist</h3>
+                @if (watchlist == null)
+                {
+                    <p>Loading watchlist...</p>
+                }
+                else if (watchlist.Items == null || watchlist.Items.Count == 0)
+                {
+                    <p>Your watchlist is empty.</p>
+                }
+                else
+                {
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        @foreach (var item in watchlist.Items)
+                        {
+                            <div class="item-card p-3 rounded flex justify-between items-center">
+                                <span>@item.MediaType: TMDB ID @item.TmdbId (Added: @item.AddedAt.ToLocalTime().ToString("d"))</span>
+                                <button @onclick="() => RemoveFromWatchlist(item.MediaType, item.TmdbId)">Remove</button>
+                            </div>
+                        }
+                    </div>
+                }
+            </div>
+
+            <!-- Other Lists Section -->
+            <div class="lists-section">
+                <h3 class="text-lg font-medium mb-2">Your Lists</h3>
+                @foreach (var list in lists.Where(l => !l.IsWatchlist))
+                {
+                    <div class="list-card p-4 rounded mb-4">
+                        <div class="flex justify-between items-center mb-2">
+                            <h4 class="text-md font-semibold">@list.Name</h4>
+                            <button @onclick="() => DeleteList(list.Id)" class="px-3 py-1 rounded transition">Delete</button>
+                        </div>
+                        @if (list.Items == null || list.Items.Count == 0)
+                        {
+                            <p>This list is empty.</p>
+                        }
+                        else
+                        {
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                @foreach (var item in list.Items)
+                                {
+                                    <div class="item-card p-3 rounded flex justify-between items-center">
+                                        <span>@item.MediaType: TMDB ID @item.TmdbId (Added: @item.AddedAt.ToLocalTime().ToString("d"))</span>
+                                        <button @onclick="() => RemoveFromList(list.Id, item.MediaType, item.TmdbId)">Remove</button>
+                                    </div>
+                                }
+                            </div>
+                        }
+                    </div>
+                }
+            </div>
+        }
+    </div>
+
+<style>
+    .animate-pop {
+        animation: popIn 0.8s ease;
+    }
+
+    .lists-card {
+        background: rgba(255, 255, 255, 0.4);
+        border-radius: 20px;
+        color: #2c5364;
+    }
+
+    .lists-header h2,
+    .watchlist-section h3,
+    .lists-section h3 {
+        color: #2c5364 !important;
+    }
+
+    .list-card {
+        background: rgba(255, 255, 255, 0.5);
+        color: #2c5364;
+    }
+
+        .list-card h4 {
+            color: #2c5364 !important;
+        }
+
+    .item-card {
+        background: rgba(255, 255, 255, 0.5);
+        color: #2c5364;
+    }
+
+        .lists-card p,
+        .list-card p,
+        .item-card span {
+            color: #2c5364 !important;
+        }
+
+    .text-red-500 {
+        color: #ff5555 !important;
+    }
+
+    .create-list-form input {
+        background: rgba(255, 255, 255, 0.2);
+        color: #2c5364;
+        border: 1px solid rgba(255, 255, 255, 0.3);
+    }
+
+        .create-list-form input::placeholder {
+            color: rgba(44, 83, 100, 0.7);
+        }
+
+    .create-list-form button,
+    .list-card button,
+    .item-card button {
+        background: #00e6e6;
+        color: #2c5364;
+        border: none;
+    }
+
+        .create-list-form button:hover,
+        .list-card button:hover,
+        .item-card button:hover {
+            background: #00cccc;
+        }
+</style>
 
 @code {
     private ClaimsPrincipal user;
@@ -31,23 +182,240 @@
     private string email = "";
     private string userId = "";
     private DateTime registrationDate = DateTime.MinValue;
+    private List<AddList> lists;
+    private AddList watchlist;
+    private string newListName = "";
+    private string errorMessage = "";
+    private bool _isInitialized;
 
     protected override async Task OnInitializedAsync()
     {
-        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
-        user = authState.User;
-
-        if (user.Identity != null && user.Identity.IsAuthenticated)
+        try
         {
-            name = user.FindFirst("unique_name")?.Value ?? "Unknown";
-            email = user.FindFirst("email")?.Value ?? "Unknown";
-            userId = user.FindFirst("nameid")?.Value ?? "Unknown";
+            _logger.LogDebug("Initializing Profile page.");
+            var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+            user = authState.User;
 
-            var createdAtClaim = user.FindFirst("createdAt")?.Value;
-            if (DateTime.TryParse(createdAtClaim, out var parsedDate))
+            if (user.Identity != null && user.Identity.IsAuthenticated)
             {
-                registrationDate = parsedDate;
+                _logger.LogDebug("User is authenticated with UserId: {UserId}", user.FindFirst("nameid")?.Value);
+                name = user.FindFirst("unique_name")?.Value ?? "Unknown";
+                email = user.FindFirst("email")?.Value ?? "Unknown";
+                userId = user.FindFirst("nameid")?.Value ?? "Unknown";
+
+                var createdAtClaim = user.FindFirst("createdAt")?.Value;
+                if (DateTime.TryParse(createdAtClaim, out var parsedDate))
+                {
+                    registrationDate = parsedDate;
+                }
+
+                _isInitialized = true;
+            }
+            else
+            {
+                _logger.LogWarning("User is not authenticated. Redirecting to login.");
+                NavigationManager.NavigateTo("/login");
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to initialize Profile page.");
+            errorMessage = "An error occurred while loading the profile.";
+        }
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender && _isInitialized)
+        {
+            try
+            {
+                await LoadLists();
+                await LoadWatchlist();
+                StateHasChanged();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to load lists or watchlist in OnAfterRenderAsync.");
+                errorMessage = "Failed to load lists or watchlist.";
             }
         }
     }
+
+    private async Task LoadLists()
+    {
+        try
+        {
+            _logger.LogDebug("Loading user lists.");
+            lists = await ListService.GetUserListsAsync();
+            errorMessage = "";
+            _logger.LogInformation("User lists loaded successfully. Count: {Count}", lists?.Count ?? 0);
+        }
+        catch (UnauthorizedAccessException)
+        {
+            _logger.LogWarning("Unauthorized access when loading lists. User is authenticated, skipping redirect.");
+            errorMessage = "Unable to load lists due to authentication issue.";
+            lists = new List<AddList>();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to load lists.");
+            errorMessage = $"Failed to load lists: {ex.Message}";
+            lists = new List<AddList>();
+        }
+    }
+
+    private async Task LoadWatchlist()
+    {
+        try
+        {
+            _logger.LogDebug("Loading watchlist.");
+            watchlist = await ListService.GetWatchlistAsync();
+            errorMessage = "";
+            _logger.LogInformation("Watchlist loaded successfully.");
+        }
+        catch (UnauthorizedAccessException)
+        {
+            _logger.LogWarning("Unauthorized access when loading watchlist. User is authenticated, skipping redirect.");
+            errorMessage = "Unable to load watchlist due to authentication issue.";
+            watchlist = null;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to load watchlist.");
+            errorMessage = $"Failed to load watchlist: {ex.Message}";
+            watchlist = null;
+        }
+    }
+
+    private async Task CreateList()
+    {
+        if (string.IsNullOrWhiteSpace(newListName))
+        {
+            errorMessage = "List name cannot be empty.";
+            _logger.LogWarning("Attempted to create list with empty name.");
+            return;
+        }
+
+        try
+        {
+            _logger.LogDebug("Creating list: {ListName}", newListName);
+            var success = await ListService.CreateListAsync(newListName);
+            if (success)
+            {
+                newListName = "";
+                errorMessage = "";
+                await LoadLists();
+                _logger.LogInformation("List created successfully: {ListName}", newListName);
+            }
+            else
+            {
+                errorMessage = "Failed to create list.";
+                _logger.LogWarning("Failed to create list: {ListName}", newListName);
+            }
+        }
+        catch (UnauthorizedAccessException)
+        {
+            _logger.LogWarning("Unauthorized access when creating list. User is authenticated, skipping redirect.");
+            errorMessage = "Unable to create list due to authentication issue.";
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to create list: {ListName}", newListName);
+            errorMessage = $"Failed to create list: {ex.Message}";
+        }
+    }
+
+    private async Task DeleteList(string listId)
+    {
+        try
+        {
+            _logger.LogDebug("Deleting list: {ListId}", listId);
+            var success = await ListService.DeleteListAsync(listId);
+            if (success)
+            {
+                errorMessage = "";
+                await LoadLists();
+                _logger.LogInformation("List deleted successfully: {ListId}", listId);
+            }
+            else
+            {
+                errorMessage = "Failed to delete list.";
+                _logger.LogWarning("Failed to delete list: {ListId}", listId);
+            }
+        }
+        catch (UnauthorizedAccessException)
+        {
+            _logger.LogWarning("Unauthorized access when deleting list. User is authenticated, skipping redirect.");
+            errorMessage = "Unable to delete list due to authentication issue.";
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to delete list: {ListId}", listId);
+            errorMessage = $"Failed to delete list: {ex.Message}";
+        }
+    }
+
+    private async Task RemoveFromWatchlist(string mediaType, int tmdbId)
+    {
+        try
+        {
+            _logger.LogDebug("Removing item from watchlist: {MediaType}, TMDB ID: {TmdbId}", mediaType, tmdbId);
+            var success = await ListService.RemoveFromWatchlistAsync(mediaType, tmdbId);
+            if (success)
+            {
+                errorMessage = "";
+                await LoadWatchlist();
+                _logger.LogInformation("Item removed from watchlist: {MediaType}, TMDB ID: {TmdbId}", mediaType, tmdbId);
+            }
+            else
+            {
+                errorMessage = "Failed to remove from watchlist.";
+                _logger.LogWarning("Failed to remove from watchlist: {MediaType}, TMDB ID: {TmdbId}", mediaType, tmdbId);
+            }
+        }
+        catch (UnauthorizedAccessException)
+        {
+            _logger.LogWarning("Unauthorized access when removing from watchlist. User is authenticated, skipping redirect.");
+            errorMessage = "Unable to remove from watchlist due to authentication issue.";
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to remove from watchlist: {MediaType}, TMDB ID: {TmdbId}", mediaType, tmdbId);
+            errorMessage = $"Failed to remove from watchlist: {ex.Message}";
+        }
+    }
+
+    private async Task RemoveFromList(string listId, string mediaType, int tmdbId)
+    {
+        try
+        {
+            _logger.LogDebug("Removing item from list: {ListId}, {MediaType}, TMDB ID: {TmdbId}", listId, mediaType, tmdbId);
+            var success = await ListService.RemoveFromListAsync(listId, mediaType, tmdbId);
+            if (success)
+            {
+                errorMessage = "";
+                await LoadLists();
+                _logger.LogInformation("Item removed from list: {ListId}, {MediaType}, TMDB ID: {TmdbId}", listId, mediaType, tmdbId);
+            }
+            else
+            {
+                errorMessage = "Failed to remove from list.";
+                _logger.LogWarning("Failed to remove from list: {ListId}, {MediaType}, TMDB ID: {TmdbId}", listId, mediaType, tmdbId);
+            }
+        }
+        catch (UnauthorizedAccessException)
+        {
+            _logger.LogWarning("Unauthorized access when removing from list. User is authenticated, skipping redirect.");
+            errorMessage = "Unable to remove from list due to authentication issue.";
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to remove from list: {ListId}, {MediaType}, TMDB ID: {TmdbId}", listId, mediaType, tmdbId);
+            errorMessage = $"Failed to remove from list: {ex.Message}";
+        }
+    }
+
+    [Inject]
+    private ILogger<Profile> _logger { get; set; }
 }

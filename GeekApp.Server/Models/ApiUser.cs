@@ -14,7 +14,7 @@ namespace GeekApp.Server.Models
         public ApiUser()
         {
             UserId = Guid.NewGuid().ToString(); // Auto-generate UserId
-            BearerToken = Guid.NewGuid().ToString(); // Auto-generate BearerToken
+
         }
     }
 }

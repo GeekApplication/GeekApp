@@ -1,43 +1,138 @@
-﻿/* Bakgrund */
+﻿/* Background */
 .profile-background {
     min-height: 100vh;
     background: linear-gradient(120deg, #0f2027, #203a43, #2c5364);
     background-size: 400% 400%;
     animation: backgroundMove 15s ease infinite;
     display: flex;
+    flex-direction: column;
     align-items: center;
-    justify-content: center;
+    justify-content: flex-start;
     padding: 2rem;
 }
 
-/* Profilkort */
+/* Profile Card */
 .profile-card {
-    background: rgba(255, 255, 255, 0.07);
+    background: rgba(255, 255, 255, 0.4); /* More opaque for dark text visibility */
     border-radius: 20px;
-    backdrop-filter: blur(20px);
-    box-shadow: 0 0 30px rgba(0, 255, 255, 0.1);
+    box-shadow: 0 0 20px rgba(0, 255, 255, 0.15);
     padding: 2.5rem;
     max-width: 500px;
     width: 100%;
-    color: white;
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: #2c5364; /* Your requested color */
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    margin-bottom: 2rem;
 }
 
 .profile-header {
-    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.3);
     padding-bottom: 1rem;
     margin-bottom: 1.5rem;
     text-align: center;
+    color: #2c5364;
 }
 
     .profile-header h2 {
-        color: #00e6e6;
+        color: #2c5364;
         font-size: 2rem;
+        font-weight: 600;
     }
 
 .profile-details p {
     margin-bottom: 0.75rem;
     font-size: 1rem;
+    color: #2c5364;
+    font-weight: 400;
+}
+
+/* Lists Card */
+.lists-card {
+    background: rgba(255, 255, 255, 0.4); /* More opaque for text visibility */
+    border-radius: 20px;
+    box-shadow: 0 0 20px rgba(0, 255, 255, 0.15);
+    padding: 2.5rem;
+    max-width: 800px;
+    width: 100%;
+    color: #2c5364;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.lists-header {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+    padding-bottom: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+    .lists-header h2 {
+        color: #2c5364;
+        font-size: 1.75rem;
+        font-weight: 600;
+    }
+
+.watchlist-section h3,
+.lists-section h3 {
+    color: #2c5364;
+    font-size: 1.5rem;
+    font-weight: 500;
+    margin-bottom: 1rem;
+}
+
+.list-card {
+    background: rgba(255, 255, 255, 0.5); /* Lighter for contrast */
+    border-radius: 10px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    color: #2c5364;
+}
+
+    .list-card h4 {
+        color: #2c5364;
+        font-size: 1.25rem;
+        font-weight: 500;
+    }
+
+.item-card {
+    background: rgba(255, 255, 255, 0.5); /* Lighter for text visibility */
+    border-radius: 8px;
+    padding: 1rem;
+    margin-bottom: 0.5rem;
+    color: #2c5364;
+    font-size: 0.95rem;
+}
+
+    .item-card span {
+        color: #2c5364;
+    }
+
+/* Buttons and Inputs */
+.create-list-form input {
+    background: rgba(255, 255, 255, 0.2);
+    color: #2c5364;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+    .create-list-form input::placeholder {
+        color: rgba(44, 83, 100, 0.7); /* Slightly lighter #2c5364 for placeholder */
+    }
+
+.create-list-form button,
+.list-card button,
+.item-card button {
+    background: #00e6e6; /* Cyan for contrast */
+    color: #2c5364; /* Readable on cyan */
+    font-weight: 500;
+    border: none;
+}
+
+    .create-list-form button:hover,
+    .list-card button:hover,
+    .item-card button:hover {
+        background: #00cccc;
+    }
+
+/* Error Messages */
+.text-red-500 {
+    color: #ff5555; /* Bright red for errors */
 }
 
 /* Animation */
