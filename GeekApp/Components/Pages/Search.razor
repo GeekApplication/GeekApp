@@ -14,9 +14,9 @@
     <div class="container py-5">
         <!-- Search Bar -->
         <div class="mb-4">
-            <form class="d-flex" @onsubmit="PerformSearch">
-                <input type="text" class="form-control search-input me-2" placeholder="Search movies, TV shows..." @bind="searchQuery" />
-                <button type="submit" class="btn btn-light-blue">Search</button>
+            <form class="d-flex align-items-center" @onsubmit="PerformSearch">
+                <input type="text" class="form-control search-input me-2" placeholder="Search movies, TV shows..." @bind="searchQuery" style="width: 700px;" />
+                <button type="submit" class="btn btn-light-blue" style="height: 44px;">Search</button>
             </form>
         </div>
 
@@ -43,13 +43,17 @@
                 </div>
                 <div class="col-md-3">
                     <label class="form-label">Year</label>
-                    <div class="input-group">
-                        <input type="number" class="form-control" placeholder="Year" @bind="selectedYear" min="1900" max="@DateTime.Now.Year" />
-                        <button class="btn btn-light-blue" @onclick="ApplyYearFilter">Apply</button>
+                    <div class="d-flex gap-2">
+                        <div class="input-group">
+                            <input type="number" class="form-control" placeholder="Year" @bind="selectedYear" min="1900" max="@DateTime.Now.Year" />
+                        </div>
+                        <button class="btn btn-light-blue d-flex align-items-center justify-content-center fs-xs" style="height: 44px; font-size: 13px;" @onclick="ApplyYearFilter">
+                            Apply
+                        </button>
+                        <button class="btn btn-light-blue d-flex align-items-center justify-content-center fs-xs" style="height: 44px; font-size: 13px;" @onclick="ForceRefresh">
+                            Refresh Results
+                        </button>
                     </div>
-                </div>
-                <div class="col-md-3">
-                    <button class="btn btn-light-blue mt-4" @onclick="ForceRefresh">Refresh Results</button>
                 </div>
             </div>
         </div>
@@ -81,7 +85,7 @@
                         var mediaType = result.MediaType ?? (MediaType == "all" ? "movie" : MediaType);
                         var isInWatchlist = watchlistStatus.ContainsKey((mediaType, result.Id)) && watchlistStatus[(mediaType, result.Id)];
                         <div class="col">
-                            <div class="result-card bg-gray-800 rounded-3 shadow-sm text-center text-decoration-none position-relative">
+                            <div class="result-card">
                                 <a href="/@(mediaType)/@result.Id" class="d-block">
                                     <img src="@result.PosterPath" alt="@(result.Title ?? result.Name ?? "Unknown")"
                                          class="img-fluid rounded-top result-img"
@@ -92,7 +96,7 @@
                                         @onclick="() => ToggleWatchlist(mediaType, result.Id)">
                                     @(isInWatchlist ? "➖" : "➕")
                                 </button>
-                                <div class="p-3">
+                                <div class="p-3 text-center">
                                     <p class="fw-medium text-white mb-1">@(result.Title ?? result.Name ?? "Unknown")</p>
                                     <p class="text-sm text-gray-400 mb-0">
                                         @(mediaType == "movie" ? "Movie" : "TV Show") - @(result.ReleaseDate ?? result.FirstAirDate ?? "N/A")
