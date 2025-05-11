@@ -1,0 +1,142 @@
+﻿/* Error Page Styles */
+.error-container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 2rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    text-align: center;
+}
+
+.error-card {
+    background: rgba(58, 134, 255, 0.15);
+    border-radius: 20px;
+    padding: 3rem;
+    box-shadow: 0 0 15px rgba(58, 134, 255, 0.5), 0 0 30px rgba(58, 134, 255, 0.3);
+    width: 100%;
+    border: 1px solid rgba(58, 134, 255, 0.3);
+    backdrop-filter: blur(10px);
+    transition: all 0.3s ease;
+}
+
+    .error-card:hover {
+        box-shadow: 0 0 20px rgba(58, 134, 255, 0.7), 0 0 40px rgba(58, 134, 255, 0.4);
+    }
+
+.error-icon {
+    font-size: 5rem;
+    color: #4cc9f0;
+    margin-bottom: 1.5rem;
+    text-shadow: 0 0 10px rgba(76, 201, 240, 0.7);
+}
+
+.error-container h1 {
+    font-size: 2.5rem;
+    color: #f0f8ff;
+    margin-bottom: 0.5rem;
+    font-weight: 700;
+    text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+}
+
+.error-container h2 {
+    font-size: 1.5rem;
+    color: #4cc9f0;
+    margin-bottom: 2rem;
+    font-weight: 400;
+}
+
+.request-id-box {
+    background: rgba(58, 134, 255, 0.3);
+    padding: 0.75rem 1.5rem;
+    border-radius: 50px;
+    margin: 1.5rem 0;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    border: 1px solid rgba(58, 134, 255, 0.5);
+}
+
+.error-actions {
+    display: flex;
+    gap: 1.5rem;
+    margin-top: 2rem;
+    justify-content: center;
+}
+
+/* Square Button Styles with Glow */
+.error-btn {
+    padding: 0.75rem 1.75rem;
+    border-radius: 4px; /* Square corners with slight rounding */
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 1rem;
+    position: relative;
+    border: none;
+    outline: none;
+    z-index: 1;
+    min-width: 180px;
+    text-align: center;
+}
+
+/* Primary Button */
+.error-btn-primary {
+    background: #3a86ff;
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 0 10px rgba(58, 134, 255, 0.5);
+}
+
+/* Outline Button */
+.error-btn-outline {
+    background: transparent;
+    color: #4cc9f0;
+    border: 1px solid #3a86ff;
+    box-shadow: 0 0 10px rgba(58, 134, 255, 0.3);
+}
+
+/* Glowing Square Border Effect */
+.error-btn::before {
+    content: '';
+    position: absolute;
+    top: -3px;
+    left: -3px;
+    right: -3px;
+    bottom: -3px;
+    border-radius: 6px; /* Slightly larger than button radius */
+    background: linear-gradient(45deg, #3a86ff, #4cc9f0);
+    z-index: -1;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+/* Hover Effects */
+.error-btn:hover {
+    transform: translateY(-3px);
+    text-shadow: 0 0 8px rgba(255, 255, 255, 0.7);
+}
+
+.error-btn-primary:hover {
+    background: linear-gradient(135deg, #3a86ff, #4cc9f0);
+    box-shadow: 0 5px 25px rgba(58, 134, 255, 0.8);
+}
+
+.error-btn-outline:hover {
+    background: rgba(58, 134, 255, 0.1);
+    color: white;
+    box-shadow: 0 5px 25px rgba(58, 134, 255, 0.6);
+}
+
+/* Show glowing border on hover */
+.error-btn:hover::before {
+    opacity: 0.8;
+}
+
+/* Active State */
+.error-btn:active {
+    transform: translateY(1px);
+    box-shadow: 0 2px 15px rgba(58, 134, 255, 0.6);
+}

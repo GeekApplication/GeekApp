@@ -1,30 +1,36 @@
 ﻿@page "/Error"
 @using System.Diagnostics
+@inject NavigationManager NavigationManager
 
-<PageTitle>Error</PageTitle>
 
-<h1 class="text-danger">Error.</h1>
-<h2 class="text-danger">An error occurred while processing your request.</h2>
+<div class="error-container">
+    <div class="error-card">
+        <div class="error-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="12" y1="8" x2="12" y2="12"></line>
+                <line x1="12" y1="16" x2="12.01" y2="16"></line>
+            </svg>
+        </div>
 
-@if (ShowRequestId)
-{
-    <p>
-        <strong>Request ID:</strong> <code>@RequestId</code>
-    </p>
-}
+        <h1>SYSTEM ERROR</h1>
+        <h2>Critical process failure detected</h2>
 
-<h3>Development Mode</h3>
-<p>
-    Swapping to <strong>Development</strong> environment will display more detailed information about the error that occurred.
-</p>
-<p>
-    <strong>The Development environment shouldn't be enabled for deployed applications.</strong>
-    It can result in displaying sensitive information from exceptions to end users.
-    For local debugging, enable the <strong>Development</strong> environment by setting the <strong>ASPNETCORE_ENVIRONMENT</strong> environment variable to <strong>Development</strong>
-    and restarting the app.
-</p>
+        @if (ShowRequestId)
+        {
+            <div class="request-id-box">
+                <strong>ERROR ID:</strong> <code>@RequestId</code>
+            </div>
+        }
 
-@code{
+        <div class="error-actions">
+            <button class="error-btn error-btn-primary" @onclick="GoHome">RETURN TO BASE</button>
+            <button class="error-btn error-btn-outline" @onclick="ReloadPage">REATTEMPT CONNECTION</button>
+        </div>
+    </div>
+</div>
+
+@code {
     [CascadingParameter]
     private HttpContext? HttpContext { get; set; }
 
@@ -33,4 +39,7 @@
 
     protected override void OnInitialized() =>
         RequestId = Activity.Current?.Id ?? HttpContext?.TraceIdentifier;
+
+    private void GoHome() => NavigationManager.NavigateTo("/");
+    private void ReloadPage() => NavigationManager.NavigateTo(NavigationManager.Uri, forceLoad: true);
 }
