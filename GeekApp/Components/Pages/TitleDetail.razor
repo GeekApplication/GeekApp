@@ -29,16 +29,21 @@ else if (titleData != null)
     <div class="min-vh-100 bg-tepapa-green text-white">
         <!-- Hero Section with Backdrop -->
         <div class="position-relative hero-section">
-            <img src="@titleData.Details.BackdropPath" alt="Backdrop" class="position-absolute w-100 h-100 object-fit-cover opacity-30" />
-            <div class="container py-5 py-md-6 position-relative">
+            <img src="@titleData.Details.BackdropPath"
+                 alt="Backdrop"
+                 class="position-absolute w-100 h-100 object-fit-cover opacity-70"
+                 style="filter: blur(12px);" />            <div class="container py-5 py-md-6 position-relative">
                 <div class="row g-4 align-items-center">
                     <div class="col-md-4">
                         <div class="position-relative poster-container">
                             <img src="@titleData.Details.PosterPath" alt="Poster" class="img-fluid rounded-3 shadow-lg poster-img" />
-                            <button class="btn btn-sm watchlist-btn @(isInWatchlist ? "btn-success" : "btn-warning")"
+
+                            <button class="btn btn-sm watchlist-btn @(isInWatchlist ? "btn-success" : "btn-warning") position-absolute top-0 end-0 m-2"
                                     title="@(isInWatchlist ? "Remove from Watchlist" : "Add to Watchlist")"
                                     @onclick="ToggleWatchlist">
-                                <span style="@(isInWatchlist ? "color: red !important;" : "")">@(isInWatchlist ? "➖" : "➕")</span>
+                                <span style="@(isInWatchlist ? "color: red !important;" : "")">
+                                    @(isInWatchlist ? "➖" : "➕")
+                                </span>
                             </button>
                         </div>
                     </div>
@@ -84,43 +89,61 @@ else if (titleData != null)
                         <p class="text-gray-200 mb-4">@titleData.Details.Overview</p>
                         <div class="row g-3">
                             <div class="col-sm-6">
-                                <p><strong>Genres:</strong> @string.Join(", ", titleData.Details.Genres?.Select(g => g.Name) ?? new List<string>())</p>
+                                <div class="detail-section">
+                                    <p><strong>Genres:</strong> @string.Join(", ", titleData.Details.Genres?.Select(g => g.Name) ?? new List<string>())</p>
+                                </div>
                             </div>
                             <div class="col-sm-6">
-                                <p><strong>@(MediaType.ToLower() == "movie" ? "Release Date" : "First Air Date"):</strong> @(titleData.Details.ReleaseDate ?? titleData.Details.FirstAirDate ?? "N/A")</p>
+                                <div class="detail-section">
+                                    <p><strong>@(MediaType.ToLower() == "movie" ? "Release Date" : "First Air Date"):</strong> @(titleData.Details.ReleaseDate ?? titleData.Details.FirstAirDate ?? "N/A")</p>
+                                </div>
                             </div>
                             <div class="col-sm-6">
-                                <p><strong>Rating:</strong> @titleData.Details.VoteAverage.ToString("0.0")/10 (@titleData.Details.VoteCount votes)</p>
+                                <div class="detail-section">
+                                    <p><strong>Rating:</strong> @titleData.Details.VoteAverage.ToString("0.0")/10 (@titleData.Details.VoteCount votes)</p>
+                                </div>
                             </div>
                             <div class="col-sm-6">
-                                @if (MediaType.ToLower() == "movie" && titleData.Details.Runtime.HasValue)
-                                {
-                                    <p><strong>Runtime:</strong> @titleData.Details.Runtime.Value minutes</p>
-                                }
-                                else if (MediaType.ToLower() == "tv" && titleData.Details.EpisodeRunTime?.Any() == true)
-                                {
-                                    <p><strong>Episode Runtime:</strong> @string.Join(", ", titleData.Details.EpisodeRunTime.Select(t => $"{t} min"))</p>
-                                }
+                                <div class="detail-section">
+                                    @if (MediaType.ToLower() == "movie" && titleData.Details.Runtime.HasValue)
+                                    {
+                                        <p><strong>Runtime:</strong> @titleData.Details.Runtime.Value minutes</p>
+                                    }
+                                    else if (MediaType.ToLower() == "tv" && titleData.Details.EpisodeRunTime?.Any() == true)
+                                    {
+                                        <p><strong>Episode Runtime:</strong> @string.Join(", ", titleData.Details.EpisodeRunTime.Select(t => $"{t} min"))</p>
+                                    }
+                                </div>
                             </div>
                             @if (MediaType.ToLower() == "movie")
                             {
                                 <div class="col-sm-6">
-                                    <p><strong>Budget:</strong> @(titleData.Details.Budget.HasValue ? $"${titleData.Details.Budget.Value:N0}" : "N/A")</p>
+                                    <div class="detail-section">
+                                        <p><strong>Budget:</strong> @(titleData.Details.Budget.HasValue ? $"${titleData.Details.Budget.Value:N0}" : "N/A")</p>
+                                    </div>
                                 </div>
                                 <div class="col-sm-6">
-                                    <p><strong>Revenue:</strong> @(titleData.Details.Revenue.HasValue ? $"${titleData.Details.Revenue.Value:N0}" : "N/A")</p>
+                                    <div class="detail-section">
+                                        <p><strong>Revenue:</strong> @(titleData.Details.Revenue.HasValue ? $"${titleData.Details.Revenue.Value:N0}" : "N/A")</p>
+                                    </div>
                                 </div>
                             }
                             <div class="col-sm-6">
-                                <p><strong>Status:</strong> @titleData.Details.Status</p>
+                                <div class="detail-section">
+                                    <p><strong>Status:</strong> @titleData.Details.Status</p>
+                                </div>
                             </div>
                             @if (MediaType.ToLower() == "tv" && titleData.Details.NumberOfSeasons.HasValue)
                             {
                                 <div class="col-sm-6">
-                                    <p><strong>Seasons:</strong> @titleData.Details.NumberOfSeasons.Value</p>
+                                    <div class="detail-section">
+                                        <p><strong>Seasons:</strong> @titleData.Details.NumberOfSeasons.Value</p>
+                                    </div>
                                 </div>
                                 <div class="col-sm-6">
-                                    <p><strong>Episodes:</strong> @(titleData.Details.NumberOfEpisodes.HasValue ? titleData.Details.NumberOfEpisodes.Value.ToString() : "N/A")</p>
+                                    <div class="detail-section">
+                                        <p><strong>Episodes:</strong> @(titleData.Details.NumberOfEpisodes.HasValue ? titleData.Details.NumberOfEpisodes.Value.ToString() : "N/A")</p>
+                                    </div>
                                 </div>
                             }
                         </div>
@@ -132,13 +155,13 @@ else if (titleData != null)
         <!-- Production Companies -->
         @if (titleData.Details.ProductionCompanies?.Any() == true)
         {
-            <div class="container py-5 bg-gray-900">
-                <h2 class="h3 fw-bold mb-4 orbitron">Production Companies</h2>
+            <div class="container py-5 production-companies-container">
+                <h2 class="h3 fw-bold mb-4 orbitron text-white">Production Companies</h2>
                 <div class="row row-cols-2 row-cols-sm-3 row-cols-md-4 g-4">
                     @foreach (var company in titleData.Details.ProductionCompanies)
                     {
                         <div class="col">
-                            <div class="company-card bg-gray-800 rounded-3 shadow-sm p-3 text-center">
+                            <div class="company-card text-center">
                                 @if (!string.IsNullOrEmpty(company.LogoPath))
                                 {
                                     <img src="@company.LogoPath" alt="@company.Name" class="img-fluid mb-2 company-logo" />
@@ -156,13 +179,13 @@ else if (titleData != null)
         @if (titleData.Details.Videos?.Results?.Any(v => v.Site == "YouTube" && v.Type == "Trailer") == true)
         {
             <div class="container py-5">
-                <h2 class="h3 fw-bold mb-4 orbitron">Trailers</h2>
+                <h2 class="h3 fw-bold mb-4 orbitron text-white">Trailers</h2>
                 <div class="row g-4">
                     @foreach (var video in titleData.Details.Videos.Results.Where(v => v.Site == "YouTube" && v.Type == "Trailer").Take(3))
                     {
-                        <div class="col-md-6 col-lg-4">
-                            <div class="video-card bg-gray-800 rounded-3 shadow-sm">
-                                <iframe class="w-100 rounded-top" height="200" src="https://www.youtube.com/embed/@video.Key" title="@video.Name" frameborder="0" allowfullscreen></iframe>
+                        <div class="col-12">
+                            <div class="video-card">
+                                <iframe class="w-100 rounded-top" height="400" src="https://www.youtube.com/embed/@video.Key" title="@video.Name" frameborder="0" allowfullscreen></iframe>
                                 <div class="p-3">
                                     <p class="fw-medium text-white mb-0">@video.Name</p>
                                 </div>
@@ -176,13 +199,13 @@ else if (titleData != null)
         <!-- Seasons (TV Only) -->
         @if (MediaType.ToLower() == "tv" && titleData.Details.Seasons?.Any() == true)
         {
-            <div class="container py-5 bg-gray-900">
-                <h2 class="h3 fw-bold mb-4 orbitron">Seasons</h2>
+            <div class="container py-5">
+                <h2 class="h3 fw-bold mb-4 orbitron text-white">Seasons</h2>
                 <div class="row row-cols-2 row-cols-sm-3 row-cols-md-4 g-4">
                     @foreach (var season in titleData.Details.Seasons)
                     {
                         <div class="col">
-                            <div class="season-card bg-gray-800 rounded-3 shadow-sm text-center cursor-pointer" @onclick="() => ShowSeasonModal(season)">
+                            <div class="season-card text-center cursor-pointer" @onclick="() => ShowSeasonModal(season)">
                                 <img src="@season.PosterPath" alt="@season.Name" class="img-fluid rounded-top season-img" />
                                 <div class="p-3">
                                     <p class="fw-medium text-white mb-1">@season.Name</p>
@@ -216,13 +239,13 @@ else if (titleData != null)
         </div>
 
         <!-- Crew Section -->
-        <div class="container py-5 bg-gray-900">
-            <h2 class="h3 fw-bold mb-4 orbitron">Crew</h2>
+        <div class="container py-5 ">
+            <h2 class="h3 fw-bold mb-4 orbitron text-white">Crew</h2>
             <div class="row row-cols-2 row-cols-sm-3 row-cols-md-4 row-cols-lg-5 g-4">
                 @foreach (var crew in titleData.Credits.Crew?.Take(15) ?? new List<TmdbCrew>())
                 {
                     <div class="col">
-                        <div class="crew-card bg-gray-800 rounded-3 shadow-sm p-3">
+                        <div class="crew-card text-center">
                             <p class="fw-medium text-white mb-1">@crew.Name</p>
                             <p class="text-sm text-gray-400">@crew.Job (@crew.Department)</p>
                         </div>

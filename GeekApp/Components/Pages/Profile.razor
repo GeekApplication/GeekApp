@@ -29,9 +29,8 @@
             <p class="text-center">Loading profile...</p>
         }
     </div>
-</div>
 
-    <!-- Lists Container -->
+    <!-- Lists Container (moved inside the parent) -->
     <div class="lists-card p-6 w-full max-w-2xl animate-pop">
         <div class="lists-header flex justify-between items-center mb-4">
             <h2 class="text-xl font-semibold">📋 Your Lists</h2>
@@ -77,39 +76,44 @@
                         }
                     </div>
                 }
-            </div>
 
-            <!-- Other Lists Section -->
-            <div class="lists-section">
-                <h3 class="text-lg font-medium mb-2">Your Lists</h3>
-                @foreach (var list in lists.Where(l => !l.IsWatchlist))
-                {
-                    <div class="list-card p-4 rounded mb-4">
-                        <div class="flex justify-between items-center mb-2">
-                            <h4 class="text-md font-semibold">@list.Name</h4>
-                            <button @onclick="() => DeleteList(list.Id)" class="px-3 py-1 rounded transition">Delete</button>
-                        </div>
-                        @if (list.Items == null || list.Items.Count == 0)
-                        {
-                            <p>This list is empty.</p>
-                        }
-                        else
-                        {
-                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                @foreach (var item in list.Items)
-                                {
-                                    <div class="item-card p-3 rounded flex justify-between items-center">
-                                        <span>@item.MediaType: TMDB ID @item.TmdbId (Added: @item.AddedAt.ToLocalTime().ToString("d"))</span>
-                                        <button @onclick="() => RemoveFromList(list.Id, item.MediaType, item.TmdbId)">Remove</button>
-                                    </div>
-                                }
+                <!-- Other Lists Section -->
+                <div class="lists-section">
+                    <h3 class="text-lg font-medium mb-2">Your Lists</h3>
+                    @foreach (var list in lists.Where(l => !l.IsWatchlist))
+                    {
+                        <div class="list-card p-4 rounded mb-4">
+                            <div class="flex justify-between items-center mb-2">
+                                <h4 class="text-md font-semibold">@list.Name</h4>
+                                <button @onclick="() => DeleteList(list.Id)" class="px-3 py-1 rounded transition">Delete</button>
                             </div>
-                        }
-                    </div>
-                }
+                            @if (list.Items == null || list.Items.Count == 0)
+                            {
+                                <p>This list is empty.</p>
+                            }
+                            else
+                            {
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                    @foreach (var item in list.Items)
+                                    {
+                                        <div class="item-card p-3 rounded flex justify-between items-center">
+                                            <span>@item.MediaType: TMDB ID @item.TmdbId (Added: @item.AddedAt.ToLocalTime().ToString("d"))</span>
+                                            <button @onclick="() => RemoveFromList(list.Id, item.MediaType, item.TmdbId)">Remove</button>
+                                        </div>
+                                    }
+                                </div>
+                            }
+                        </div>
+                    }
+                </div>
             </div>
         }
     </div>
+</div>
+
+            
+        
+    
 
 
 <style>

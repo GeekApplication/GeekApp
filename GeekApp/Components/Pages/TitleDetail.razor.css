@@ -58,11 +58,11 @@
     }
 
 /* Image styles */
-.poster-img, .cast-img, .similar-img, .season-img, .episode-img {
+.poster-img, .cast-img, .season-img, .episode-img {
     transition: transform 0.3s ease;
 }
 
-    .poster-img:hover, .cast-img:hover, .similar-img:hover, .season-img:hover, .episode-img:hover {
+    .poster-img:hover, .cast-img:hover, .season-img:hover, .episode-img:hover {
         transform: scale(1.05);
     }
 
@@ -140,4 +140,273 @@
 /* Text sizes */
 .text-sm {
     font-size: 0.875rem;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #1e90ff, #00bfff);
+    border: none;
+    color: white;
+    font-weight: bold;
+    transition: all 0.3s ease;
+    box-shadow: 0 0 0 rgba(0, 191, 255, 0);
+    position: relative;
+    overflow: hidden;
+    border-radius: 8px;
+}
+
+    /* Hover Effects */
+    .btn-primary:hover {
+        transform: scale(1.05);
+        box-shadow: 0 0 15px 5px rgba(0, 191, 255, 0.6);
+        background: linear-gradient(135deg, #00bfff, #1e90ff); /* reverse gradient */
+    }
+
+    /* Optional: glow animation on hover */
+    .btn-primary::after {
+        content: '';
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: radial-gradient(circle, rgba(0,191,255,0.3) 0%, transparent 70%);
+        opacity: 0;
+        transition: opacity 0.4s ease;
+        z-index: 0;
+    }
+
+    .btn-primary:hover::after {
+        opacity: 1;
+    }
+
+.watchlist-btn {
+    background: linear-gradient(135deg, #1e90ff, #00bfff);
+    border: none;
+    color: white;
+    font-weight: bold;
+    border-radius: 999px; /* fully rounded pill shape */
+    padding: 0.4rem 1.2rem;
+    transition: all 0.3s ease;
+    box-shadow: 0 0 0 rgba(0, 191, 255, 0);
+    position: relative;
+    overflow: hidden;
+}
+
+    /* Hover glow and scale effect */
+    .watchlist-btn:hover {
+        transform: scale(1.05);
+        box-shadow: 0 0 12px 5px rgba(0, 191, 255, 0.6);
+        background: linear-gradient(135deg, #00bfff, #1e90ff);
+    }
+
+    /* Optional glowing radial background */
+    .watchlist-btn::after {
+        content: '';
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: radial-gradient(circle, rgba(0,191,255,0.2) 0%, transparent 70%);
+        opacity: 0;
+        transition: opacity 0.4s ease;
+        z-index: 0;
+    }
+
+    .watchlist-btn:hover::after {
+        opacity: 1;
+    }
+.detail-section {
+    background: rgba(20, 20, 20, 0.95); /* slightly lighter than pure black */
+    border: 1px solid rgba(0, 191, 255, 0.1); /* subtle blue border */
+    border-radius: 12px;
+    padding: 1rem;
+    box-shadow: 0 4px 8px rgba(0, 123, 255, 0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+    /* Hover effect with blue glow */
+    .detail-section:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 0 18px 6px rgba(0, 191, 255, 0.3);
+    }
+
+    /* Optional: glowing animated pulse inside the section */
+    .detail-section::after {
+        content: '';
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: radial-gradient(circle, rgba(0, 191, 255, 0.12) 0%, transparent 70%);
+        opacity: 0;
+        transition: opacity 0.4s ease;
+        z-index: 0;
+        pointer-events: none;
+    }
+
+    .detail-section:hover::after {
+        opacity: 1;
+    }
+
+.production-companies-container {
+    background-color: transparent; /* transparent black backdrop */
+    border-radius: 12px;
+    padding: 2rem;
+}
+
+.company-card {
+    background-color: rgba(255, 255, 255, 0.03); /* subtle background */
+    border: 1px solid rgba(0, 123, 255, 0.2); /* soft blue border */
+    border-radius: 12px;
+    padding: 1rem;
+    min-height: 160px;
+    height: 100%;
+    transition: transform 0.2s ease, box-shadow 0.3s ease, background-color 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+    .company-card:hover {
+        background-color: rgba(0, 123, 255, 0.15);
+        box-shadow: 0 0 12px rgba(0, 191, 255, 0.4);
+        transform: translateY(-4px);
+    }
+
+.company-logo {
+    max-height: 50px;
+    object-fit: contain;
+    margin-bottom: 0.5rem;
+}
+
+.video-card {
+    background-color: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(0, 123, 255, 0.2);
+    border-radius: 12px;
+    overflow: hidden;
+    transition: transform 0.2s ease, box-shadow 0.3s ease, background-color 0.3s ease;
+    box-shadow: 0 4px 8px rgba(0, 123, 255, 0.1);
+}
+
+    .video-card:hover {
+        background-color: rgba(0, 123, 255, 0.1);
+        transform: translateY(-4px);
+        box-shadow: 0 0 16px rgba(0, 191, 255, 0.4);
+    }
+
+.season-card {
+    background-color: rgba(255, 255, 255, 0.05); /* Transparent background */
+    border: 1px solid rgba(0, 123, 255, 0.2); /* Soft blue border */
+    border-radius: 12px;
+    transition: transform 0.2s ease, box-shadow 0.3s ease, background-color 0.3s ease;
+    padding: 1rem;
+    box-shadow: 0 4px 8px rgba(0, 123, 255, 0.1);
+    cursor: pointer;
+}
+
+    .season-card:hover {
+        background-color: rgba(0, 123, 255, 0.1); /* Blue hover background */
+        box-shadow: 0 0 16px rgba(0, 191, 255, 0.4); /* Blue glow */
+        transform: translateY(-4px);
+    }
+
+.season-img {
+    max-height: 200px; /* Adjust image height */
+    object-fit: cover;
+    margin-bottom: 1rem;
+}
+
+.cast-card {
+    background-color: rgba(255, 255, 255, 0.05); /* Transparent background */
+    border: 1px solid rgba(255, 255, 255, 0.2); /* Thin border */
+    border-radius: 12px;
+    padding: 1rem;
+    transition: transform 0.2s ease, box-shadow 0.3s ease, background-color 0.3s ease;
+    box-shadow: 0 4px 8px rgba(0, 123, 255, 0.1);
+}
+
+    .cast-card:hover {
+        background-color: rgba(0, 123, 255, 0.1); /* Blue hover background */
+        box-shadow: 0 0 16px rgba(0, 191, 255, 0.4); /* Blue glow */
+        transform: translateY(-4px); /* Slight lift effect */
+    }
+
+.cast-img {
+    max-height: 200px; /* Adjust image size */
+    object-fit: cover;
+    margin-bottom: 1rem;
+    border-radius: 50%; /* Make image circular */
+}
+
+.crew-card {
+    background-color: rgba(255, 255, 255, 0.05); /* Transparent background */
+    border: 1px solid rgba(255, 255, 255, 0.2); /* Thin border */
+    border-radius: 12px;
+    padding: 1rem;
+    transition: transform 0.2s ease, box-shadow 0.3s ease, background-color 0.3s ease;
+    box-shadow: 0 4px 8px rgba(0, 123, 255, 0.1);
+}
+
+    .crew-card:hover {
+        background-color: rgba(0, 123, 255, 0.1); /* Blue hover background */
+        box-shadow: 0 0 16px rgba(0, 191, 255, 0.4); /* Blue glow */
+        transform: translateY(-4px); /* Slight lift effect */
+    }
+
+.similar-card {
+    border: 2px solid rgba(255, 255, 255, 0.3); /* Border around each similar title */
+    border-radius: 12px;
+    background-color: #2c3e50; /* Dark background for each card */
+    transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+    text-decoration: none;
+    position: relative;
+    font-size: 14px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+    .similar-card:hover {
+        transform: translateY(-4px);
+        border-color: rgba(0, 123, 255, 0.8); /* Light up the border with blue when hovered */
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.3), 0 0 35px rgba(0, 149, 255, 0.7), 0 0 55px rgba(0, 149, 255, 0.5);
+        filter: brightness(1.05) saturate(1.1); /* Slightly brighter on hover */
+    }
+
+.similar-img {
+    height: auto;
+    border-top-left-radius: 12px;
+    border-top-right-radius: 12px;
+    display: block;
+}
+
+.similar-card .p-3 {
+    padding: 1.2rem;
+}
+
+.similar-card .similar-title {
+    font-weight: 600;
+    margin-bottom: 0.4rem;
+    color: #e0f7ff;
+    transition: all 0.3s ease;
+}
+
+.similar-card:hover .similar-title {
+    color: white;
+    text-shadow: 0 0 10px rgba(0, 200, 255, 0.5);
+}
+
+.similar-card .similar-meta {
+    font-size: 0.85rem;
+    color: rgba(180, 230, 255, 0.8);
+    transition: all 0.3s ease;
+}
+
+.similar-card:hover .similar-meta {
+    color: rgba(200, 240, 255, 0.9);
 }

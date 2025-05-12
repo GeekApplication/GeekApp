@@ -2,7 +2,36 @@
 @inject HttpClient Http
 <PageTitle>Home</PageTitle>
 
-<div class="home-container">
-    
+<div class="hero-section text-center text-white d-flex flex-column justify-content-center align-items-center" style="min-height: 90vh; padding: 2rem;">
+    <h1 style="font-size: 3rem; font-weight: bold; text-shadow: 0 0 12px rgba(0,255,255,0.4);">
+        Welcome to <span style="color: var(--bs-cyan);">GeekApp</span>
+    </h1>
+    <p style="font-size: 1.25rem; max-width: 700px; margin-top: 1rem;">
+        Discover, track, and geek out over your favorite movies and TV shows. Join a community of entertainment lovers.
+    </p>
+    <a href="/search" class="btn btn-outline-light mt-4 px-4 py-2" style="font-size: 1.1rem;">
+        Start Exploring
+    </a>
 </div>
+
+<section class="features-section py-5 text-white" style="background: rgba(255,255,255,0.03); backdrop-filter: blur(6px);">
+    <div class="container" style="max-width: 1100px; margin: auto;">
+        <h2 class="text-center mb-4" style="color: var(--bs-cyan);">What You Can Do</h2>
+        <div class="row d-flex justify-content-center gap-4">
+            <div class="card bg-primary text-white p-4 shadow-lg rounded" style="flex: 1 1 300px; min-width: 300px; border: 1px solid rgba(255,255,255,0.1);">
+                <h4 class="mb-2">🔍 Search</h4>
+                <p>Find info on thousands of movies and TV shows with lightning-fast search powered by modern APIs.</p>
+            </div>
+            <div class="card bg-primary text-white p-4 shadow-lg rounded" style="flex: 1 1 300px; min-width: 300px; border: 1px solid rgba(255,255,255,0.1);">
+                <h4 class="mb-2">📋 Create Watchlists</h4>
+                <p>Organize what you've seen and what's next. Build personal watchlists and keep track of everything.</p>
+            </div>
+            <div class="card bg-primary text-white p-4 shadow-lg rounded" style="flex: 1 1 300px; min-width: 300px; border: 1px solid rgba(255,255,255,0.1);">
+                <h4 class="mb-2">⭐ Rate & Review</h4>
+                <p>Love it or hate it? Share your opinions and rate movies and series with your own geek voice.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
 
