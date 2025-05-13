@@ -33,10 +33,13 @@
     <!-- Lists Container (moved inside the parent) -->
     <div class="lists-card p-6 w-full max-w-2xl animate-pop">
         <div class="lists-header flex justify-between items-center mb-4">
-            <h2 class="text-xl font-semibold">📋 Your Lists</h2>
-            <div class="create-list-form flex items-center space-x-2">
-                <input type="text" @bind="newListName" placeholder="New list name" class="border rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500" />
-                <button @onclick="CreateList" class="px-4 py-2 rounded transition">Create</button>
+            <h2 class="lists-title">📋 Your Lists</h2>
+            <div class="d-flex align-items-center gap-2">
+                <input type="text"
+                       @bind="newListName"
+                       placeholder="New list name"
+                       class="custom-input form-control" style="width: auto;" />
+                <button @onclick="CreateList" class="btn-light-blue">Create</button>
             </div>
         </div>
         @if (!string.IsNullOrEmpty(errorMessage))
@@ -55,14 +58,14 @@
         {
             <!-- Watchlist Section -->
             <div class="watchlist-section mb-6">
-                <h3 class="text-lg font-medium mb-2">Watchlist</h3>
+                <h3 class="lists-title">Watchlist</h3>
                 @if (watchlist == null)
                 {
                     <p>Loading watchlist...</p>
                 }
                 else if (watchlist.Items == null || watchlist.Items.Count == 0)
                 {
-                    <p>Your watchlist is empty.</p>
+                    <p class="lists-title">Your watchlist is empty.</p>
                 }
                 else
                 {
@@ -71,7 +74,7 @@
                         {
                             <div class="item-card p-3 rounded flex justify-between items-center">
                                 <span>@item.MediaType: TMDB ID @item.TmdbId (Added: @item.AddedAt.ToLocalTime().ToString("d"))</span>
-                                <button @onclick="() => RemoveFromWatchlist(item.MediaType, item.TmdbId)">Remove</button>
+                                <button @onclick="() => RemoveFromWatchlist(item.MediaType, item.TmdbId)" class="btn-light-blue">Remove</button>
                             </div>
                         }
                     </div>
@@ -79,13 +82,13 @@
 
                 <!-- Other Lists Section -->
                 <div class="lists-section">
-                    <h3 class="text-lg font-medium mb-2">Your Lists</h3>
+                    <h3 class="lists-title">Your Lists</h3>
                     @foreach (var list in lists.Where(l => !l.IsWatchlist))
                     {
                         <div class="list-card p-4 rounded mb-4">
                             <div class="flex justify-between items-center mb-2">
                                 <h4 class="text-md font-semibold">@list.Name</h4>
-                                <button @onclick="() => DeleteList(list.Id)" class="px-3 py-1 rounded transition">Delete</button>
+                                <button @onclick="() => DeleteList(list.Id)" class= "btn-light-blue">Delete</button>
                             </div>
                             @if (list.Items == null || list.Items.Count == 0)
                             {
@@ -98,7 +101,7 @@
                                     {
                                         <div class="item-card p-3 rounded flex justify-between items-center">
                                             <span>@item.MediaType: TMDB ID @item.TmdbId (Added: @item.AddedAt.ToLocalTime().ToString("d"))</span>
-                                            <button @onclick="() => RemoveFromList(list.Id, item.MediaType, item.TmdbId)">Remove</button>
+                                            <button @onclick="() => RemoveFromList(list.Id, item.MediaType, item.TmdbId)" class="btn-light-blue">Remove</button>
                                         </div>
                                     }
                                 </div>

@@ -1,0 +1,76 @@
+﻿/* Privacy Policy Section Styling */
+.privacy-policy {
+    background: linear-gradient(135deg, #0a1921, #152a35, #1d3a4a);
+    padding-top: 2rem;
+}
+
+    .privacy-policy .card {
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        background-color: var(--bs-primary);
+        color: white;
+        transition: all 0.3s ease;
+    }
+
+        .privacy-policy .card:hover {
+            box-shadow: 0 0 15px rgba(0, 255, 255, 0.6); /* Blue glow on hover */
+            transform: translateY(-3px); /* Slight lift effect */
+        }
+
+/* Header Styling */
+h1 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: var(--bs-cyan);
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+/* Card Content Styling */
+.card h4 {
+    font-size: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.card p {
+    font-size: 1rem;
+    line-height: 1.5;
+    margin-bottom: 1.5rem;
+}
+
+/* Footer Styling */
+.site-footer {
+    background: linear-gradient(120deg, #0f2027, #203a43);
+    color: #f0f8ff;
+    padding: 1.5rem 0;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+}
+
+.footer-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 1rem;
+}
+
+.footer-line {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    gap: 1.5rem;
+}
+
+.footer-legal a,
+.footer-connect a,
+.copyright {
+    color: rgba(255, 255, 255, 0.7);
+    text-decoration: none;
+    transition: all 0.3s ease;
+}
+
+    .footer-legal a:hover,
+    .footer-connect a:hover {
+        color: var(--bs-cyan);
+        text-shadow: 0 0 6px var(--bs-highlight);
+    }
