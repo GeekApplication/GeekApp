@@ -180,42 +180,95 @@
     }
 
 .watchlist-btn {
-    background: linear-gradient(135deg, #1e90ff, #00bfff);
-    border: none;
-    color: white;
-    font-weight: bold;
-    border-radius: 999px; /* fully rounded pill shape */
-    padding: 0.4rem 1.2rem;
-    transition: all 0.3s ease;
-    box-shadow: 0 0 0 rgba(0, 191, 255, 0);
-    position: relative;
-    overflow: hidden;
+    width: 36px; /* Slightly larger for better visual impact */
+    height: 36px;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    font-size: 1.1rem;
+    line-height: 1;
+    z-index: 10;
+    opacity: 0.9; /* Slightly more opaque by default */
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); /* Smoother transition */
+    box-shadow: 0 0 8px rgba(0, 150, 255, 0.3); /* Subtle glow */
+    border: 2px solid transparent; /* Transparent border initially */
+    background-image: linear-gradient(to right, #00f260, #0575e6); /* Vibrant gradient background */
+    background-clip: border-box;
+    color: white; /* Default text color */
 }
 
-    /* Hover glow and scale effect */
     .watchlist-btn:hover {
-        transform: scale(1.05);
-        box-shadow: 0 0 12px 5px rgba(0, 191, 255, 0.6);
-        background: linear-gradient(135deg, #00bfff, #1e90ff);
+        opacity: 1;
+        transform: scale(1.15); /* More pronounced scale on hover */
+        box-shadow: 0 0 15px rgba(0, 150, 255, 0.6); /* Stronger glow on hover */
+        border: 2px solid #00ffff; /* Glowing cyan border on hover */
+        background-image: linear-gradient(to right, #0575e6, #00f260); /* Reverse gradient on hover */
     }
 
-    /* Optional glowing radial background */
-    .watchlist-btn::after {
+    .watchlist-btn::before {
         content: '';
         position: absolute;
-        top: -50%;
-        left: -50%;
-        width: 200%;
-        height: 200%;
-        background: radial-gradient(circle, rgba(0,191,255,0.2) 0%, transparent 70%);
-        opacity: 0;
-        transition: opacity 0.4s ease;
-        z-index: 0;
+        top: -3px;
+        left: -3px;
+        right: -3px;
+        bottom: -3px;
+        border-radius: 50%;
+        border: 2px solid transparent;
+        background: linear-gradient(to right, #00f260, #0575e6);
+        z-index: -1; /* Behind the button content */
+        animation: pulse-border 2s linear infinite; /* Pulsating border animation */
     }
 
-    .watchlist-btn:hover::after {
-        opacity: 1;
+@keyframes pulse-border {
+    0% {
+        opacity: 0.5;
+        transform: scale(1);
     }
+
+    50% {
+        opacity: 1;
+        transform: scale(1.1);
+    }
+
+    100% {
+        opacity: 0.5;
+        transform: scale(1);
+    }
+}
+
+.btn-success.watchlist-btn {
+    background-image: linear-gradient(to right, #5cb85c, #1e7e34); /* Green futuristic gradient */
+    box-shadow: 0 0 8px rgba(92, 184, 92, 0.5);
+}
+
+    .btn-success.watchlist-btn:hover {
+        border-color: #baf7b5;
+        box-shadow: 0 0 15px rgba(92, 184, 92, 0.8);
+        background-image: linear-gradient(to right, #1e7e34, #5cb85c); /* Reverse gradient */
+    }
+
+    .btn-success.watchlist-btn::before {
+        background: linear-gradient(to right, #5cb85c, #1e7e34);
+    }
+
+.btn-warning.watchlist-btn {
+    background-image: linear-gradient(to right, #ffc107, #d39e00); /* Yellow/orange futuristic gradient */
+    color: #212529; /* Keep dark text */
+    box-shadow: 0 0 8px rgba(255, 193, 7, 0.5);
+}
+
+    .btn-warning.watchlist-btn:hover {
+        border-color: #ffeeba;
+        box-shadow: 0 0 15px rgba(255, 193, 7, 0.8);
+        background-image: linear-gradient(to right, #d39e00, #ffc107); /* Reverse gradient */
+    }
+
+    .btn-warning.watchlist-btn::before {
+        background: linear-gradient(to right, #ffc107, #d39e00);
+    }
+
 .detail-section {
     background: rgba(20, 20, 20, 0.95); /* slightly lighter than pure black */
     border: 1px solid rgba(0, 191, 255, 0.1); /* subtle blue border */
@@ -410,3 +463,5 @@
 .similar-card:hover .similar-meta {
     color: rgba(200, 240, 255, 0.9);
 }
+
+

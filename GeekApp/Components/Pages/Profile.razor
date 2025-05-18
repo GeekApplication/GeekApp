@@ -59,26 +59,11 @@
             <!-- Watchlist Section -->
             <div class="watchlist-section mb-6">
                 <h3 class="lists-title">Watchlist</h3>
-                @if (watchlist == null)
-                {
-                    <p>Loading watchlist...</p>
-                }
-                else if (watchlist.Items == null || watchlist.Items.Count == 0)
-                {
-                    <p class="lists-title">Your watchlist is empty.</p>
-                }
-                else
-                {
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        @foreach (var item in watchlist.Items)
-                        {
-                            <div class="item-card p-3 rounded flex justify-between items-center">
-                                <span>@item.MediaType: TMDB ID @item.TmdbId (Added: @item.AddedAt.ToLocalTime().ToString("d"))</span>
-                                <button @onclick="() => RemoveFromWatchlist(item.MediaType, item.TmdbId)" class="btn-light-blue">Remove</button>
-                            </div>
-                        }
-                    </div>
-                }
+                <button class="btn-light-blue" style="margin-bottom: 10px;">
+                    <NavLink href="/list/watchlist" >Go to Watchlist Page</NavLink>
+                </button>
+                
+            
 
                 <!-- Other Lists Section -->
                 <div class="lists-section">
@@ -88,24 +73,14 @@
                         <div class="list-card p-4 rounded mb-4">
                             <div class="flex justify-between items-center mb-2">
                                 <h4 class="text-md font-semibold">@list.Name</h4>
-                                <button @onclick="() => DeleteList(list.Id)" class= "btn-light-blue">Delete</button>
-                            </div>
-                            @if (list.Items == null || list.Items.Count == 0)
-                            {
-                                <p>This list is empty.</p>
-                            }
-                            else
-                            {
-                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                    @foreach (var item in list.Items)
-                                    {
-                                        <div class="item-card p-3 rounded flex justify-between items-center">
-                                            <span>@item.MediaType: TMDB ID @item.TmdbId (Added: @item.AddedAt.ToLocalTime().ToString("d"))</span>
-                                            <button @onclick="() => RemoveFromList(list.Id, item.MediaType, item.TmdbId)" class="btn-light-blue">Remove</button>
-                                        </div>
-                                    }
+                                <div class="flex gap-4">
+                                    <button class="btn-light-blue" style="margin-right: 10px;">
+                                        <NavLink href="@($"/list/{list.Id}")">Go to My List</NavLink>
+                                    </button>
+                                    <button @onclick="() => DeleteList(list.Id)" class="btn-light-blue">Delete</button>
                                 </div>
-                            }
+                            </div>
+                            
                         </div>
                     }
                 </div>

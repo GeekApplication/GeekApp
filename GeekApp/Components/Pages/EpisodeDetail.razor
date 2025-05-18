@@ -30,18 +30,39 @@ else if (episodeData != null)
                         <img src="@(episodeData.StillPath ?? "https://via.placeholder.com/300x450?text=No+Image")" alt="Episode Still" class="img-fluid rounded-3 shadow-lg episode-img" />
                     </div>
                     <div class="col-md-8">
-                        <h1 class="display-4 fw-bold mb-3 orbitron">@episodeData.Name</h1>
-                        <p class="lead text-gray-200 mb-3">Season @SeasonNumber, Episode @EpisodeNumber</p>
-                        <p class="text-gray-200 mb-4">@episodeData.Overview</p>
+
+                        <div>
+                            <h1 class="display-4 fw-bold orbitron">@episodeData.Name</h1>
+                        </div>
+
+                        <div class="info-card">
+                            <p class="lead text-gray-400">Season @SeasonNumber, Episode @EpisodeNumber</p>
+                        </div>
+
+                        <div class="info-card">
+                            <p class="text-gray-200">@episodeData.Overview</p>
+                        </div>
+
                         <div class="row g-3">
                             <div class="col-sm-6">
-                                <p><strong>Air Date:</strong> @(episodeData.AirDate ?? "N/A")</p>
+                                <div class="info-card">
+                                    <p><strong>Air Date:</strong> @(episodeData.AirDate ?? "N/A")</p>
+                                </div>
                             </div>
                             <div class="col-sm-6">
-                                <p><strong>Rating:</strong> @episodeData.VoteAverage.ToString("0.0")/10 (@episodeData.VoteCount votes)</p>
+                                <div class="info-card">
+                                    <p><strong>Rating:</strong> @episodeData.VoteAverage.ToString("0.0")/10 (@episodeData.VoteCount votes)</p>
+                                </div>
                             </div>
                         </div>
+
+                        <div class="mt-5">
+                            <a href="javascript:history.back()" class="btn-primary btn-lg">Go back to previous page for more seasons!</a>
+                        </div>
+
                     </div>
+
+                    
                 </div>
             </div>
         </div>
@@ -93,4 +114,8 @@ else if (episodeData != null)
             isLoading = false;
         }
     }
+
+    
+        
+    
 }

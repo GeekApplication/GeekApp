@@ -74,7 +74,7 @@
                     {
                         var isInWatchlist = watchlistStatus.ContainsKey((item.MediaType, item.TmdbId)) && watchlistStatus[(item.MediaType, item.TmdbId)];
                         <div class="col">
-                            <div class="result-card bg-gray-800 rounded-3 shadow-sm text-center text-decoration-none position-relative">
+                            <div class="result-card text-center">
                                 <a href="/@item.MediaType/@item.TmdbId" class="d-block">
                                     <img src="@item.PosterPath" alt="@(item.Title ?? item.Name ?? "Unknown")"
                                          class="img-fluid rounded-top result-img"
@@ -93,7 +93,6 @@
                                     <p class="result-meta text-sm text-gray-400 mb-0">
                                         Rating: @(item.VoteAverage.HasValue ? item.VoteAverage.Value.ToString("0.0") + "/10" : "N/A")
                                     </p>
-                                    <p class="result-overview text-sm text-gray-400 mb-1">@item.Overview</p>
                                 </div>
                             </div>
                         </div>

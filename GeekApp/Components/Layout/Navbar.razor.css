@@ -10,7 +10,7 @@
 }
 
 .search-input {
-    max-width: 300px;
+    max-width: 600px;
 }
 
 .search-suggestions {
@@ -50,4 +50,20 @@
 
 .text-gray-400 {
     color: var(--gray-light);
+}
+
+.navbar-left {
+    flex: 1;
+}
+
+.navbar-center {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+}
+
+.navbar-right {
+    flex: 1;
+    display: flex;
+    justify-content: flex-end;
 }

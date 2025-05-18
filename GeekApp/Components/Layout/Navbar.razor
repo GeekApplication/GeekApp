@@ -7,49 +7,20 @@
 
 <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
     <div class="container-fluid">
-        <!-- Brand on the left -->
-        <a class="navbar-brand" href="/">GeekApp</a>
+        <div class="d-flex w-100 align-items-center justify-content-between">
+            <!-- Left: Brand -->
+            <div class="navbar-left">
+                <a class="navbar-brand" href="/">GeekApp</a>
+            </div>
 
-        <!-- Toggle button for mobile -->
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent"
-                aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-
-        <!-- Links on the right -->
-        <div class="collapse navbar-collapse justify-content-end" id="navbarSupportedContent">
-            <ul class="navbar-nav mb-2 mb-lg-0">
-                <li class="nav-item">
-                    <NavLink class="nav-link" href="/">Home</NavLink>
-                </li>
-                <li class="nav-item">
-                    <NavLink class="nav-link" href="/search">Search</NavLink>
-                </li>
-                <li class="nav-item">
-                    <NavLink class="nav-link" href="/discover">Discover</NavLink>
-                </li>
-
-                <AuthorizeView>
-                    <Authorized>
-                        <li class="nav-item">
-                            <NavLink class="nav-link" href="/profile">Profile</NavLink>
-                        </li>
-                        <li class="nav-item">
-                            <button class="btn btn-outline-light ms-2" @onclick="Logout">Logout</button>
-                        </li>
-                    </Authorized>
-                    <NotAuthorized>
-                        <li class="nav-item">
-                            <NavLink class="nav-link" href="/login">Login</NavLink>
-                        </li>
-                        <li class="nav-item">
-                            <NavLink class="nav-link" href="/register">Register</NavLink>
-                        </li>
-                    </NotAuthorized>
-                </AuthorizeView>
-            </ul>
-            <div class="d-flex position-relative">
-                <input type="text" class="form-control search-input" placeholder="Search movies, TV shows..." @bind="searchQuery" @bind:event="oninput" @onkeyup="HandleSearchKeyUp" @onfocus="ShowSuggestions" @onblur="HideSuggestionsDelayed" />
+            <!-- Center: Search Bar -->
+            <div class="navbar-center position-relative mx-auto" style="width: 300px;">
+                <input type="text" class="form-control search-input" placeholder="Search movies, TV shows..."
+                       @bind="searchQuery"
+                       @bind:event="oninput"
+                       @onkeyup="HandleSearchKeyUp"
+                       @onfocus="ShowSuggestions"
+                       @onblur="HideSuggestionsDelayed" />
                 @if (showSuggestions && searchResults?.Results?.Any() == true)
                 {
                     <div class="search-suggestions position-absolute bg-gray-800 rounded-3 shadow-lg">
@@ -67,6 +38,40 @@
                         }
                     </div>
                 }
+            </div>
+
+            <!-- Right: Nav Links -->
+            <div class="collapse navbar-collapse justify-content-end navbar-right" id="navbarSupportedContent">
+                <ul class="navbar-nav mb-2 mb-lg-0">
+                    <li class="nav-item">
+                        <NavLink class="nav-link" href="/">Home</NavLink>
+                    </li>
+                    <li class="nav-item">
+                        <NavLink class="nav-link" href="/search">Search</NavLink>
+                    </li>
+                    <li class="nav-item">
+                        <NavLink class="nav-link" href="/discover">Discover</NavLink>
+                    </li>
+
+                    <AuthorizeView>
+                        <Authorized>
+                            <li class="nav-item">
+                                <NavLink class="nav-link" href="/profile">Profile</NavLink>
+                            </li>
+                            <li class="nav-item">
+                                <button class="btn btn-outline-light ms-2" @onclick="Logout">Logout</button>
+                            </li>
+                        </Authorized>
+                        <NotAuthorized>
+                            <li class="nav-item">
+                                <NavLink class="nav-link" href="/login">Login</NavLink>
+                            </li>
+                            <li class="nav-item">
+                                <NavLink class="nav-link" href="/register">Register</NavLink>
+                            </li>
+                        </NotAuthorized>
+                    </AuthorizeView>
+                </ul>
             </div>
         </div>
     </div>

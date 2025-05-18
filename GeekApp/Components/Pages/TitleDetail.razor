@@ -38,10 +38,10 @@ else if (titleData != null)
                         <div class="position-relative poster-container">
                             <img src="@titleData.Details.PosterPath" alt="Poster" class="img-fluid rounded-3 shadow-lg poster-img" />
 
-                            <button class="btn btn-sm watchlist-btn @(isInWatchlist ? "btn-success" : "btn-warning") position-absolute top-0 end-0 m-2"
+                            <button class="watchlist-btn @(isInWatchlist ? "btn-success" : "btn-warning") position-absolute top-0 end-0 m-2"
                                     title="@(isInWatchlist ? "Remove from Watchlist" : "Add to Watchlist")"
                                     @onclick="ToggleWatchlist">
-                                <span style="@(isInWatchlist ? "color: red !important;" : "")">
+                                <span  style="@(isInWatchlist ? "color: red !important;" : "")">
                                     @(isInWatchlist ? "➖" : "➕")
                                 </span>
                             </button>
