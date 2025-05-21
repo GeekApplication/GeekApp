@@ -1,5 +1,14 @@
 ﻿@page "/"
+@using GeekApp.Shared.ApiModels
+@using GeekApp.Shared.Lists
+@using Microsoft.AspNetCore.Components.Authorization
 @inject HttpClient Http
+@inject IContentService ContentService
+@inject IListService ListService
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject NavigationManager Navigation
+@inject ILogger<Home> Logger
+@implements IDisposable
 <PageTitle>Home</PageTitle>
 
 <div class="hero-section text-center text-white d-flex flex-column justify-content-center align-items-center" style="min-height: 90vh; padding: 2rem;">
@@ -14,19 +23,149 @@
     </a>
 </div>
 
+<!-- Trending Movies Carousel -->
+<section class="carousel-section py-5 text-white bg-tepapa-green">
+    <div class="container">
+        <h2 class="text-center mb-4 orbitron" style="color: var(--bs-cyan);">Trending Movies</h2>
+        <div class="position-relative carousel-container">
+            @if (isLoading)
+            {
+                <div class="d-flex align-items-center justify-content-center" style="min-height: 500px;">
+                    <div class="spinner-border text-light-blue" role="status"></div>
+                    <span class="ms-3 fs-5">Loading...</span>
+                </div>
+            }
+            else if (trendingMovies?.Any() == true)
+            {
+                var currentMovie = trendingMovies[currentIndex];
+                <div class="carousel-content">
+                    <div class="position-relative hero-section">
+                        <img src="@(currentMovie.BackdropPath != null ? $"https://image.tmdb.org/t/p/w1280{currentMovie.BackdropPath}" : "/images/backdrop-placeholder.jpg")"
+                             alt="Backdrop"
+                             class="position-absolute w-100 h-100 object-fit-cover opacity-70"
+                             style="filter: blur(12px); z-index: 0;" />
+                        <div class="container py-5 py-md-6 position-relative" style="z-index: 1;">
+                            <div class="row g-4 align-items-center">
+                                <div class="col-md-4 col-12">
+                                    <div class="poster-container">
+                                        <a href="/movie/@currentMovie.Id">
+                                            <img src="@(currentMovie.PosterPath ?? "/images/poster-placeholder.jpg")"
+                                                 alt="@(currentMovie.Title ?? "Unknown")"
+                                                 class="img-fluid rounded-3 shadow-lg poster-img" />
+                                        </a>
+                                        <button class="watchlist-btn @(watchlistStatus.ContainsKey(currentMovie.Id) && watchlistStatus[currentMovie.Id] ? "btn-success" : "btn-warning") position-absolute top-0 end-0 m-2"
+                                                title="@(watchlistStatus.ContainsKey(currentMovie.Id) && watchlistStatus[currentMovie.Id] ? "Remove from Watchlist" : "Add to Watchlist")"
+                                                @onclick="() => ToggleWatchlist(currentMovie.Id)">
+                                            <span style="@(watchlistStatus.ContainsKey(currentMovie.Id) && watchlistStatus[currentMovie.Id] ? "color: red !important;" : "")">
+                                                @(watchlistStatus.ContainsKey(currentMovie.Id) && watchlistStatus[currentMovie.Id] ? "➖" : "➕")
+                                            </span>
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="col-md-8 col-12">
+                                    <h1 class="display-4 fw-bold mb-3 orbitron">@(currentMovie.Title ?? "Unknown")</h1>
+                                    <p class="text-sm text-gray-400 mb-3">@(currentMovie.ReleaseDate ?? "N/A")</p>
+                                    <p class="text-gray-200 mb-4">@(currentMovie.Overview ?? "No description available.")</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <button class="carousel-nav carousel-nav-prev" @onclick="PrevMovie">
+                        <span>❮</span>
+                    </button>
+                    <button class="carousel-nav carousel-nav-next" @onclick="NextMovie">
+                        <span>❯</span>
+                    </button>
+                </div>
+            }
+            else
+            {
+                <div class="d-flex align-items-center justify-content-center" style="min-height: 500px;">
+                    <p class="text-gray-400">No trending movies found</p>
+                </div>
+            }
+        </div>
+    </div>
+</section>
+
+<!-- Trending TV Shows Carousel -->
+<section class="carousel-section py-5 text-white bg-tepapa-green">
+    <div class="container">
+        <h2 class="text-center mb-4 orbitron" style="color: var(--bs-cyan);">Trending TV Shows</h2>
+        <div class="position-relative carousel-container">
+            @if (isTvLoading)
+            {
+                <div class="d-flex align-items-center justify-content-center" style="min-height: 500px;">
+                    <div class="spinner-border text-light-blue" role="status"></div>
+                    <span class="ms-3 fs-5">Loading...</span>
+                </div>
+            }
+            else if (trendingTvShows?.Any() == true)
+            {
+                var currentTvShow = trendingTvShows[currentTvIndex];
+                <div class="carousel-content">
+                    <div class="position-relative hero-section">
+                        <img src="@(currentTvShow.BackdropPath != null ? $"https://image.tmdb.org/t/p/w1280{currentTvShow.BackdropPath}" : "/images/backdrop-placeholder.jpg")"
+                             alt="Backdrop"
+                             class="position-absolute w-100 h-100 object-fit-cover opacity-70"
+                             style="filter: blur(12px); z-index: 0;" />
+                        <div class="container py-5 py-md-6 position-relative" style="z-index: 1;">
+                            <div class="row g-4 align-items-center">
+                                <div class="col-md-4 col-12">
+                                    <div class="poster-container">
+                                        <a href="/tv/@currentTvShow.Id">
+                                            <img src="@(currentTvShow.PosterPath ?? "/images/poster-placeholder.jpg")"
+                                                 alt="@(currentTvShow.Name ?? "Unknown")"
+                                                 class="img-fluid rounded-3 shadow-lg poster-img" />
+                                        </a>
+                                        <button class="watchlist-btn @(tvWatchlistStatus.ContainsKey(currentTvShow.Id) && tvWatchlistStatus[currentTvShow.Id] ? "btn-success" : "btn-warning") position-absolute top-0 end-0 m-2"
+                                                title="@(tvWatchlistStatus.ContainsKey(currentTvShow.Id) && tvWatchlistStatus[currentTvShow.Id] ? "Remove from Watchlist" : "Add to Watchlist")"
+                                                @onclick="() => ToggleTvWatchlist(currentTvShow.Id)">
+                                            <span style="@(tvWatchlistStatus.ContainsKey(currentTvShow.Id) && tvWatchlistStatus[currentTvShow.Id] ? "color: red !important;" : "")">
+                                                @(tvWatchlistStatus.ContainsKey(currentTvShow.Id) && tvWatchlistStatus[currentTvShow.Id] ? "➖" : "➕")
+                                            </span>
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="col-md-8 col-12">
+                                    <h1 class="display-4 fw-bold mb-3 orbitron">@(currentTvShow.Name ?? "Unknown")</h1>
+                                    <p class="text-sm text-gray-400 mb-3">@(currentTvShow.FirstAirDate ?? "N/A")</p>
+                                    <p class="text-gray-200 mb-4">@(currentTvShow.Overview ?? "No description available.")</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <button class="carousel-nav carousel-nav-prev" @onclick="PrevTvShow">
+                        <span>❮</span>
+                    </button>
+                    <button class="carousel-nav carousel-nav-next" @onclick="NextTvShow">
+                        <span>❯</span>
+                    </button>
+                </div>
+            }
+            else
+            {
+                <div class="d-flex align-items-center justify-content-center" style="min-height: 500px;">
+                    <p class="text-gray-400">No trending TV shows found</p>
+                </div>
+            }
+        </div>
+    </div>
+</section>
+
 <section class="features-section py-5 text-white" style="background: rgba(255,255,255,0.03); backdrop-filter: blur(6px);">
     <div class="container" style="max-width: 1100px; margin: auto;">
-        <h2 class="text-center mb-4" style="color: var(--bs-cyan);">What You Can Do</h2>
+        <h2 class="text-center mb-4 orbitron" style="color: var(--bs-cyan);">What You Can Do</h2>
         <div class="row d-flex justify-content-center gap-4">
-            <div class="card bg-primary text-white p-4 shadow-lg rounded" style="flex: 1 1 300px; min-width: 300px; border: 1px solid rgba(255,255,255,0.1);">
+            <div class="card bg-primary text-white p-4 shadow-lg rounded clickable-card" style="flex: 1 1 300px; min-width: 300px; border: 1px solid rgba(255,255,255,0.1);" @onclick="NavigateToSearch">
                 <h4 class="mb-2">🔍 Search</h4>
                 <p>Find info on thousands of movies and TV shows with lightning-fast search powered by modern APIs.</p>
             </div>
-            <div class="card bg-primary text-white p-4 shadow-lg rounded" style="flex: 1 1 300px; min-width: 300px; border: 1px solid rgba(255,255,255,0.1);">
+            <div class="card bg-primary text-white p-4 shadow-lg rounded clickable-card" style="flex: 1 1 300px; min-width: 300px; border: 1px solid rgba(255,255,255,0.1);" @onclick="NavigateToProfileOrLogin">
                 <h4 class="mb-2">📋 Create Watchlists</h4>
                 <p>Organize what you've seen and what's next. Build personal watchlists and keep track of everything.</p>
             </div>
-            <div class="card bg-primary text-white p-4 shadow-lg rounded" style="flex: 1 1 300px; min-width: 300px; border: 1px solid rgba(255,255,255,0.1);">
+            <div class="card bg-primary text-white p-4 shadow-lg rounded clickable-card" style="flex: 1 1 300px; min-width: 300px; border: 1px solid rgba(255,255,255,0.1);" @onclick="NavigateToDiscover">
                 <h4 class="mb-2">📅 Upcoming Releases</h4>
                 <p>Stay ahead of the curve. Discover upcoming movies and TV shows you won’t want to miss, and mark your calendar!</p>
             </div>
@@ -34,4 +173,342 @@
     </div>
 </section>
 
+@code {
+    private List<TmdbResult> trendingMovies = new();
+    private Dictionary<int, bool> watchlistStatus = new();
+    private int currentIndex = 0;
+    private bool isLoading = true;
+    private System.Timers.Timer carouselTimer;
 
+    private List<TmdbResult> trendingTvShows = new();
+    private Dictionary<int, bool> tvWatchlistStatus = new();
+    private int currentTvIndex = 0;
+    private bool isTvLoading = true;
+    private System.Timers.Timer tvCarouselTimer;
+
+    private AddList watchlist;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        if (authState.User.Identity?.IsAuthenticated == true)
+        {
+            try
+            {
+                Logger.LogInformation("Fetching watchlist for authenticated user");
+                watchlist = await ListService.GetWatchlistAsync();
+                Logger.LogInformation("Fetched watchlist with {ItemCount} items", watchlist?.Items?.Count ?? 0);
+            }
+            catch (Exception ex)
+            {
+                Logger.LogWarning(ex, "Failed to fetch watchlist");
+                watchlist = new AddList { Items = new List<ListItem>() };
+            }
+        }
+        else
+        {
+            watchlist = new AddList { Items = new List<ListItem>() };
+        }
+
+        await Task.WhenAll(LoadTrendingMovies(), LoadTrendingTvShows());
+        StartCarouselTimer();
+        StartTvCarouselTimer();
+    }
+
+    private async Task LoadTrendingMovies()
+    {
+        try
+        {
+            Logger.LogInformation("Fetching trending movies...");
+            isLoading = true;
+            var result = await ContentService.GetTrendingAsync("movie", "week", 1, 10);
+            Logger.LogDebug("Raw Movie API response: Results count: {Count}, IsNull: {IsNull}", result?.Results?.Count ?? 0, result == null);
+            if (result?.Results != null)
+            {
+                trendingMovies = result.Results.Take(10).ToList();
+                Logger.LogInformation("Fetched {Count} trending movies", trendingMovies.Count);
+                foreach (var movie in trendingMovies)
+                {
+                    Logger.LogDebug("Movie: {Title}, ID: {Id}, Poster: {PosterPath}, Backdrop: {BackdropPath}, Release: {ReleaseDate}, Overview: {Overview}",
+                        movie.Title, movie.Id, movie.PosterPath, movie.BackdropPath, movie.ReleaseDate, movie.Overview);
+                }
+            }
+            else
+            {
+                Logger.LogWarning("Movie API response is null or has no results.");
+                trendingMovies = new List<TmdbResult>();
+            }
+            await InitializeWatchlistStatus();
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Error loading trending movies");
+            trendingMovies = new List<TmdbResult>();
+        }
+        finally
+        {
+            isLoading = false;
+            await InvokeAsync(StateHasChanged);
+        }
+    }
+
+    private async Task LoadTrendingTvShows()
+    {
+        try
+        {
+            Logger.LogInformation("Fetching trending TV shows...");
+            isTvLoading = true;
+            var result = await ContentService.GetTrendingAsync("tv", "week", 1, 10);
+            Logger.LogDebug("Raw TV API response: Results count: {Count}, IsNull: {IsNull}", result?.Results?.Count ?? 0, result == null);
+            if (result?.Results != null)
+            {
+                trendingTvShows = result.Results.Take(10).ToList();
+                Logger.LogInformation("Fetched {Count} trending TV shows", trendingTvShows.Count);
+                foreach (var tvShow in trendingTvShows)
+                {
+                    Logger.LogDebug("TV Show: {Name}, ID: {Id}, Poster: {PosterPath}, Backdrop: {BackdropPath}, FirstAirDate: {FirstAirDate}, Overview: {Overview}",
+                        tvShow.Name, tvShow.Id, tvShow.PosterPath, tvShow.BackdropPath, tvShow.FirstAirDate, tvShow.Overview);
+                }
+            }
+            else
+            {
+                Logger.LogWarning("TV API response is null or has no results.");
+                trendingTvShows = new List<TmdbResult>();
+            }
+            await InitializeTvWatchlistStatus();
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Error loading trending TV shows");
+            trendingTvShows = new List<TmdbResult>();
+        }
+        finally
+        {
+            isTvLoading = false;
+            await InvokeAsync(StateHasChanged);
+        }
+    }
+
+    private async Task InitializeWatchlistStatus()
+    {
+        try
+        {
+            watchlistStatus = trendingMovies.ToDictionary(
+                m => m.Id,
+                m => watchlist?.Items?.Any(i => i.MediaType == "movie" && i.TmdbId == m.Id) ?? false
+            );
+            foreach (var (id, inWatchlist) in watchlistStatus)
+            {
+                Logger.LogDebug("Movie ID: {Id}, In Watchlist: {InWatchlist}", id, inWatchlist);
+            }
+        }
+        catch (Exception ex)
+        {
+            Logger.LogWarning(ex, "Failed to initialize movie watchlist status");
+            watchlistStatus = trendingMovies.ToDictionary(m => m.Id, _ => false);
+        }
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private async Task InitializeTvWatchlistStatus()
+    {
+        try
+        {
+            tvWatchlistStatus = trendingTvShows.ToDictionary(
+                t => t.Id,
+                t => watchlist?.Items?.Any(i => i.MediaType == "tv" && i.TmdbId == t.Id) ?? false
+            );
+            foreach (var (id, inWatchlist) in tvWatchlistStatus)
+            {
+                Logger.LogDebug("TV Show ID: {Id}, In Watchlist: {InWatchlist}", id, inWatchlist);
+            }
+        }
+        catch (Exception ex)
+        {
+            Logger.LogWarning(ex, "Failed to initialize TV watchlist status");
+            tvWatchlistStatus = trendingTvShows.ToDictionary(t => t.Id, _ => false);
+        }
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private async Task ToggleWatchlist(int movieId)
+    {
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        if (authState.User.Identity?.IsAuthenticated != true)
+        {
+            Navigation.NavigateTo("/login");
+            return;
+        }
+
+        try
+        {
+            bool success;
+            if (watchlistStatus[movieId])
+            {
+                success = await ListService.RemoveFromWatchlistAsync("movie", movieId);
+                if (success)
+                {
+                    watchlistStatus[movieId] = false;
+                    watchlist.Items.RemoveAll(i => i.MediaType == "movie" && i.TmdbId == movieId);
+                    Logger.LogInformation("Removed from watchlist: movie, TMDB ID: {TmdbId}", movieId);
+                }
+                else
+                {
+                    Logger.LogWarning("Failed to remove from watchlist: movie, TMDB ID: {TmdbId}", movieId);
+                }
+            }
+            else
+            {
+                success = await ListService.AddToWatchlistAsync("movie", movieId);
+                if (success)
+                {
+                    watchlistStatus[movieId] = true;
+                    watchlist.Items.Add(new ListItem { MediaType = "movie", TmdbId = movieId });
+                    Logger.LogInformation("Added to watchlist: movie, TMDB ID: {TmdbId}", movieId);
+                }
+                else
+                {
+                    Logger.LogWarning("Failed to add to watchlist: movie, TMDB ID: {TmdbId}", movieId);
+                }
+            }
+            await InvokeAsync(StateHasChanged);
+        }
+        catch (UnauthorizedAccessException)
+        {
+            Logger.LogWarning("Unauthorized access when toggling movie watchlist.");
+            Navigation.NavigateTo("/login");
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Failed to toggle watchlist: movie, TMDB ID: {TmdbId}", movieId);
+        }
+    }
+
+    private async Task ToggleTvWatchlist(int tvShowId)
+    {
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        if (authState.User.Identity?.IsAuthenticated != true)
+        {
+            Navigation.NavigateTo("/login");
+            return;
+        }
+
+        try
+        {
+            bool success;
+            if (tvWatchlistStatus[tvShowId])
+            {
+                success = await ListService.RemoveFromWatchlistAsync("tv", tvShowId);
+                if (success)
+                {
+                    tvWatchlistStatus[tvShowId] = false;
+                    watchlist.Items.RemoveAll(i => i.MediaType == "tv" && i.TmdbId == tvShowId);
+                    Logger.LogInformation("Removed from watchlist: tv, TMDB ID: {TmdbId}", tvShowId);
+                }
+                else
+                {
+                    Logger.LogWarning("Failed to remove from watchlist: tv, TMDB ID: {TmdbId}", tvShowId);
+                }
+            }
+            else
+            {
+                success = await ListService.AddToWatchlistAsync("tv", tvShowId);
+                if (success)
+                {
+                    tvWatchlistStatus[tvShowId] = true;
+                    watchlist.Items.Add(new ListItem { MediaType = "tv", TmdbId = tvShowId });
+                    Logger.LogInformation("Added to watchlist: tv, TMDB ID: {TmdbId}", tvShowId);
+                }
+                else
+                {
+                    Logger.LogWarning("Failed to add to watchlist: tv, TMDB ID: {TmdbId}", tvShowId);
+                }
+            }
+            await InvokeAsync(StateHasChanged);
+        }
+        catch (UnauthorizedAccessException)
+        {
+            Logger.LogWarning("Unauthorized access when toggling TV watchlist.");
+            Navigation.NavigateTo("/login");
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Failed to toggle watchlist: tv, TMDB ID: {TmdbId}", tvShowId);
+        }
+    }
+
+    private void StartCarouselTimer()
+    {
+        carouselTimer = new System.Timers.Timer(5000);
+        carouselTimer.Elapsed += async (sender, e) => await NextMovie();
+        carouselTimer.AutoReset = true;
+        carouselTimer.Start();
+    }
+
+    private void StartTvCarouselTimer()
+    {
+        tvCarouselTimer = new System.Timers.Timer(5000);
+        tvCarouselTimer.Elapsed += async (sender, e) => await NextTvShow();
+        tvCarouselTimer.AutoReset = true;
+        tvCarouselTimer.Start();
+    }
+
+    private async Task NextMovie()
+    {
+        currentIndex = (currentIndex + 1) % trendingMovies.Count;
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private async Task PrevMovie()
+    {
+        currentIndex = (currentIndex - 1 + trendingMovies.Count) % trendingMovies.Count;
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private async Task NextTvShow()
+    {
+        currentTvIndex = (currentTvIndex + 1) % trendingTvShows.Count;
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private async Task PrevTvShow()
+    {
+        currentTvIndex = (currentTvIndex - 1 + trendingTvShows.Count) % trendingTvShows.Count;
+        await InvokeAsync(StateHasChanged);
+    }
+
+    public void Dispose()
+    {
+        carouselTimer?.Stop();
+        carouselTimer?.Dispose();
+        tvCarouselTimer?.Stop();
+        tvCarouselTimer?.Dispose();
+    }
+
+    private async Task NavigateToSearch()
+    {
+        Logger.LogInformation("Navigating to /search");
+        Navigation.NavigateTo("/search");
+    }
+
+    private async Task NavigateToProfileOrLogin()
+    {
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        if (authState.User.Identity?.IsAuthenticated == true)
+        {
+            Logger.LogInformation("User authenticated, navigating to /profile");
+            Navigation.NavigateTo("/profile");
+        }
+        else
+        {
+            Logger.LogInformation("User not authenticated, navigating to /login");
+            Navigation.NavigateTo("/login");
+        }
+    }
+
+    private async Task NavigateToDiscover()
+    {
+        Logger.LogInformation("Navigating to /discover");
+        Navigation.NavigateTo("/discover");
+    }
+}

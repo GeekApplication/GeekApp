@@ -1,9 +1,10 @@
-﻿@inherits LayoutComponentBase
+﻿@using Microsoft.AspNetCore.Components.Authorization
+@inherits LayoutComponentBase
 @inject NavigationManager NavManager
 @inject IAuthService AuthService
 @inject IHttpClientFactory HttpClientFactory
 @inject AuthenticationStateProvider AuthStateProvider
-@using Microsoft.AspNetCore.Components.Authorization
+@inject ILogger<MainLayout> Logger
 
 <PageTitle>GeekApp</PageTitle>
 
@@ -16,7 +17,7 @@
         @Body
     </div>
 
-    <Footer/>
+    <Footer />
 </div>
 
 @code {
@@ -27,36 +28,38 @@
     {
         if (firstRender)
         {
-            _logger.LogDebug("Checking authentication state in MainLayout.");
-            var authState = await AuthStateProvider.GetAuthenticationStateAsync();
-            var userId = authState.User.FindFirst("nameid")?.Value;
-            if (string.IsNullOrEmpty(userId))
-            {
-                _logger.LogDebug("No authenticated user found in MainLayout.");
-                NavManager.NavigateTo("/login");
-                return;
-            }
-
-            _logger.LogDebug("Authenticated user found with UserId: {UserId}.", userId);
-            var http = HttpClientFactory.CreateClient("AuthorizedAPI");
             try
             {
-                _logger.LogDebug("Fetching lists from API.");
-                _result = await http.GetStringAsync("api/lists/all");
+                Logger.LogDebug("Checking authentication state in MainLayout.");
+                var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+                var user = authState.User;
+
+                if (user.Identity?.IsAuthenticated ?? false)
+                {
+                    var userId = user.FindFirst("nameid")?.Value;
+                    Logger.LogDebug("Authenticated user found with UserId: {UserId}", userId);
+
+                    var http = HttpClientFactory.CreateClient("AuthorizedAPI");
+                    _result = await http.GetStringAsync("api/lists/all");
+                    Logger.LogInformation("Lists fetched successfully in MainLayout.");
+                }
+                else
+                {
+                    Logger.LogDebug("User is not authenticated. Skipping list fetch.");
+                }
+
                 _ready = true;
-                _logger.LogInformation("Lists fetched successfully in MainLayout.");
                 StateHasChanged();
             }
             catch (HttpRequestException ex) when (ex.StatusCode == System.Net.HttpStatusCode.Unauthorized)
             {
-                _logger.LogWarning("Unauthorized access when fetching lists. User is authenticated, skipping redirect.");
-                // Do not redirect to login if user is authenticated
+                Logger.LogWarning("Unauthorized access when fetching lists.");
                 _ready = true;
                 StateHasChanged();
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Failed to fetch lists in MainLayout.");
+                Logger.LogError(ex, "Failed to fetch lists in MainLayout.");
                 _ready = true;
                 StateHasChanged();
             }
@@ -67,17 +70,14 @@
     {
         try
         {
-            _logger.LogDebug("Initiating logout in MainLayout.");
+            Logger.LogDebug("Initiating logout in MainLayout.");
             await AuthService.LogoutAsync();
-            _logger.LogInformation("Logout successful in MainLayout.");
+            Logger.LogInformation("Logout successful in MainLayout.");
             NavManager.NavigateTo("/login");
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Logout failed in MainLayout.");
+            Logger.LogError(ex, "Logout failed in MainLayout.");
         }
     }
-
-    [Inject]
-    private ILogger<MainLayout> _logger { get; set; }
 }

@@ -163,6 +163,7 @@ h2.orbitron {
     overflow: hidden;
     height: 40px;
     width: 100px;
+    align-items: center;
 }
 
     .btn-light-blue:hover {

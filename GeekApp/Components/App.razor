@@ -1,5 +1,6 @@
 ﻿@using GeekApp.Components.Layout
 @using GeekApp.Components.Pages
+@using Microsoft.AspNetCore.Authorization
 @using Microsoft.AspNetCore.Components.Authorization
 @inject NavigationManager NavigationManager
 
@@ -8,9 +9,13 @@
         <Found Context="routeData">
             <AuthorizeRouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)">
                 <NotAuthorized>
-                    @{
-                        // Redirect to login page programmatically
+                    @if (routeData.PageType.CustomAttributes.Any(attr => attr.GetType() == typeof(AuthorizeAttribute)))
+                    {
                         NavigationManager.NavigateTo("/login");
+                    }
+                    else
+                    {
+                        <p>You are not authorized to access this content.</p>
                     }
                 </NotAuthorized>
                 <Authorizing>
@@ -20,7 +25,6 @@
         </Found>
         <NotFound>
             <LayoutView Layout="@typeof(MainLayout)">
-                
                 <Error />
             </LayoutView>
         </NotFound>
