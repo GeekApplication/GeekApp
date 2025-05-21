@@ -109,9 +109,16 @@ else if (titleData != null)
                                     {
                                         <p><strong>Runtime:</strong> @titleData.Details.Runtime.Value minutes</p>
                                     }
-                                    else if (MediaType.ToLower() == "tv" && titleData.Details.EpisodeRunTime?.Any() == true)
+                                    else if (MediaType.ToLower() == "tv")
                                     {
-                                        <p><strong>Episode Runtime:</strong> @string.Join(", ", titleData.Details.EpisodeRunTime.Select(t => $"{t} min"))</p>
+                                        @if (titleData?.Details?.EpisodeRunTime?.Any(t => t > 0) == true)
+                                        {
+                                            <p><strong>Episode Runtime:</strong> @string.Join(", ", titleData.Details.EpisodeRunTime.Where(t => t > 0).Select(t => $"{t} min"))</p>
+                                        }
+                                        else
+                                        {
+                                            <p><strong>Episode Runtime:</strong> Not Specified</p>
+                                        }
                                     }
                                 </div>
                             </div>
